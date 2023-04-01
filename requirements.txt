@@ -4,6 +4,7 @@ Django==4.1.7
 django-stdimage==6.0.1
 Pillow==9.5.0
 psycopg2-binary==2.9.5
+python-decouple==3.8
 sqlparse==0.4.3
 static3==0.7.0
 tzdata==2023.3
