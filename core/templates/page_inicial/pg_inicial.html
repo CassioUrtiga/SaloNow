@@ -25,20 +25,43 @@
     
         <div class="page">
 
-        <header class="section page-header">
-            <img src="https://via.placeholder.com/140x60" alt="SaloNow">
            
-            <h3>Sejam bem-vindos</h3>
-            
-            <div>
-                <a href="{% url 'login' %}">
-                    <button style="--clr:#39FF14"><span>Login</span><i></i></button>
-                </a>
-                <a href="{% url 'cadastrar' %}">
-                    <button style="--clr:#8A2BE2"><span>Cadastre-se</span><i></i></button>
-                </a>
-            </div>
-        </header>
+           
+
+        
+        <body>
+            <header class="section page-header navbar-fixed-top">
+                <div class="container">
+                  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                    <a class="navbar-brand d-flex align-items-center" href="#">
+                      <img src="https://via.placeholder.com/140x60" alt="SaloNow" class="d-inline-block">
+                      <h3 class="ml-3 mb-0">SALO NOW</h3>
+                    </a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                      <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                        <div>
+                            <a href="{% url 'login' %}">
+                                <button style="--clr:#39FF14"><span>Login</span><i></i></button>
+                            </a>
+                            <div class="dropdown">
+                                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="--clr:#8A2BE2">
+                                    <span>Cadastre-se</span><i></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                  <li><a class="dropdown-item" href="{% url 'cadastrar-cliente' %}">Cliente</a></li>
+                                  <li><a class="dropdown-item" href="{% url 'cadastrar-proprietario' %}">Proprietário</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                  </nav>
+                </div>
+              </header>
+              
+              
 
         <!-- Swiper -->
         <section class="section swiper-container swiper-slider swiper-slider-1 slider-scale-effect" data-loop="false" data-autoplay="5500" data-simulate-touch="false" data-slide-effect="fade">
@@ -236,10 +259,19 @@
             </div>
         </section>
     
-        <footer>
-            <h1>rodapé</h1>
+        <footer class="bg-dark text-white">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <p>&copy; 2023 SALO NOW</p>
+                    </div>
+                </div>
+            </div>
         </footer>
+        
+          
     </main>
+    
 {% endblock content %}
 
 {% block script %}

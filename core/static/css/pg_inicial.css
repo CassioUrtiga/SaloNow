@@ -110,19 +110,26 @@ button:hover i::after {
 }
 
 header{
-	display: flex;
-	flex-wrap: wrap;
+	
+    display: flex;
 	justify-content: space-between;
 	align-items: center;
 	padding: 15px;
 	margin-bottom: 1em;
 	background-color: #cef1ea;
 	box-shadow: 1px 10px 15px rgba(0, 0, 0, 0.300);
+	
 }
 
 header a{
 	text-decoration: none;
 	cursor: default;
+}
+
+
+
+.nav {
+	margin-left: auto;
 }
 
 .heading-decorate .divider {
