@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from .forms import FormularioCliente,FormularioProprietario
 
 # Create your views here.
 def tela_inicial(request):
@@ -8,5 +9,12 @@ def login(request):
     return render(request, 'page_login/pg_login.html')
 
 def cadastrar(request):
-    return render(request, 'page_login/pg_cadastro.html')
+    form_proprietario = FormularioProprietario(request.POST)
+    form_cliente = FormularioCliente(request.POST)
+
+    context = {
+        'form_cliente': form_cliente, 
+        'form_proprietario': form_proprietario
+    }
+    return render(request, 'page_login/pg_cadastro.html',context)
 
