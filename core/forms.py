@@ -1,5 +1,6 @@
 from django import forms
-from .models import Cliente,Proprietario
+from .models import Cliente, Proprietario
+
 
 class FormularioCliente(forms.ModelForm):
     nome_completo = forms.CharField(required=True, max_length=100, widget=forms.TextInput(attrs={
@@ -7,13 +8,6 @@ class FormularioCliente(forms.ModelForm):
         'class': 'form-control',
         'name': 'nome',
         'placeholder': 'Nome completo',
-    }))
-
-    sobrenome = forms.CharField(max_length=50, widget=forms.TextInput(attrs={
-        'id': 'sobrenome',
-        'class': 'form-control',
-        'name': 'sobrenome',
-        'placeholder': 'Sobrenome'
     }))
 
     username = forms.CharField(max_length=50, required=True, widget=forms.TextInput(attrs={
@@ -40,8 +34,7 @@ class FormularioCliente(forms.ModelForm):
 
     class Meta:
         model = Cliente
-        fields = ('nome_completo', 'sobrenome', 'username' ,'email', 'senha')
-
+        fields = ('nome_completo', 'username' ,'email', 'senha')
 
 
 class FormularioProprietario(forms.ModelForm):
@@ -50,13 +43,6 @@ class FormularioProprietario(forms.ModelForm):
         'class': 'form-control',
         'name': 'nome',
         'placeholder': 'Nome completo',
-    }))
-
-    sobrenome = forms.CharField(max_length=50, widget=forms.TextInput(attrs={
-        'id': 'sobrenome',
-        'class': 'form-control',
-        'name': 'sobrenome',
-        'placeholder': 'Sobrenome'
     }))
 
     cnpj = forms.CharField(required=True, widget=forms.TextInput(attrs={
@@ -91,7 +77,4 @@ class FormularioProprietario(forms.ModelForm):
 
     class Meta:
         model = Proprietario
-        fields = ('nome_completo', 'sobrenome', 'cnpj', 'username', 'email', 'senha')
-    
-
-
+        fields = ('nome_completo', 'cnpj', 'username', 'email', 'senha')

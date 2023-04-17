@@ -1,10 +1,10 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
-from .forms import FormularioCliente, FormularioProprietario
 import requests
 import re
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.contrib.auth.models import User
+from .forms import FormularioCliente, FormularioProprietario
 
 
 # Views
@@ -37,7 +37,11 @@ def login_view(request):
     else:
         return render(request, 'page_login/login.html')
 
+
 def logout_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
     logout(request)
     return redirect('inicio')
 
@@ -115,6 +119,9 @@ def cadastrar_proprietario(request):
         return render(request, 'page_login/cadastro_proprietario.html', {'form': FormularioProprietario()})
 
 def tela_principal(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
     return render(request, 'page/principal.html')
     
 def aguardar(request):

@@ -1,10 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Cliente(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nome_completo = models.CharField(max_length=100, null=False)
-    sobrenome = models.CharField(max_length=50, default=None)
+
+    class Meta:
+        verbose_name = 'cliente'
+        verbose_name_plural = 'clientes'
 
     def __str__(self) -> str:
         return self.nome_completo
@@ -13,9 +17,11 @@ class Cliente(models.Model):
 class Proprietario(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nome_completo = models.CharField(max_length=100, null=False)
-    sobrenome = models.CharField(max_length=50, default=None)
-    cnpj = models.CharField(max_length=18)
+    cnpj = models.CharField(max_length=18, null=False)
+
+    class Meta:
+        verbose_name = 'proprietario'
+        verbose_name_plural = 'proprietarios'
 
     def __str__(self) -> str:
         return self.nome_completo
-    
