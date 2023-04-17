@@ -3,7 +3,7 @@
 
 {% block css %}
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato:300i,400,400i,700%7CMontserrat:400,500,600,700%7CPlayfair+Display:400,700,700i%7COswald:400,700,700i">
-    <link rel="stylesheet" href="{% static 'css/pg_inicial.css' %}">
+    <link rel="stylesheet" href="{% static 'css/page_inicial.css' %}">
 {% endblock css %}
 
 {% block title %}
@@ -25,49 +25,45 @@
     
         <div class="page">
 
-           
-           
-
-        
-        <body>
-            <header class="section page-header navbar-fixed-top">
-                <div class="container">
-                  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                    <a class="navbar-brand d-flex align-items-center" href="#">
-                      <img src="https://via.placeholder.com/140x60" alt="SaloNow" class="d-inline-block">
-                      <h3 class="ml-3 mb-0">SALO NOW</h3>
+        <header>
+            <a href="#">
+                <img src="https://via.placeholder.com/140x60" alt="SaloNow">
+            </a>
+            <h3>SALONOW</h3>
+            <div>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'principal' %}">
+                        <button type="button" class="btn btn-primary">Página principal</button>
                     </a>
-                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-                            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                      <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                        <div>
-                            <a href="{% url 'login' %}">
-                                <button style="--clr:#39FF14"><span>Login</span><i></i></button>
-                            </a>
-                            <div class="dropdown">
-                                <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="--clr:#8A2BE2">
-                                    <span>Cadastre-se</span><i></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                  <li><a class="dropdown-item" href="{% url 'cadastrar-cliente' %}">Cliente</a></li>
-                                  <li><a class="dropdown-item" href="{% url 'cadastrar-proprietario' %}">Proprietário</a></li>
-                                </ul>
-                            </div>
+                    <a href="{% url 'deslogar' %}">
+                        <button type="button" class="btn btn-danger">Sair</button>
+                    </a>
+                {% else %}
+                    <div style="display: inline-block; margin-right: 10px;">
+                        <a href="{% url 'login' %}">
+                        <button class="bot-style" style="--clr:#39FF14"><span>Login</span><i></i></button>
+                        </a>
+                    </div>
+                    <div style="display: inline-block;">
+                        <div class="dropdown">
+                        <button class="dropdown-toggle bot-style" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="--clr:#8A2BE2">
+                            <span>Cadastre-se</span><i></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'cadastrar-cliente' %}">Cliente</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cadastrar-proprietario' %}">Proprietário</a></li>
+                        </ul>
                         </div>
                     </div>
-                  </nav>
-                </div>
-              </header>
-              
-              
+                {% endif %}
+            </div>
+        </header>
 
         <!-- Swiper -->
         <section class="section swiper-container swiper-slider swiper-slider-1 slider-scale-effect" data-loop="false" data-autoplay="5500" data-simulate-touch="false" data-slide-effect="fade">
             <div class="swiper-wrapper">
             <div class="swiper-slide slide-bg-1">
-                <div class="slide-bg swiper-white-filter" style="background-image: url(&quot;{% static 'imgs/pg_inicial/salon1.png' %}&quot;)"></div>
+                <div class="slide-bg swiper-white-filter" style="background-image: url(&quot;{% static 'imgs/page_inicial/salon1.png' %}&quot;)"></div>
                 <div class="swiper-slide-caption section-md">
                 <div class="container">
                     <div class="row">
@@ -81,7 +77,7 @@
                 </div>
             </div>
             <div class="swiper-slide slide-bg-2">
-                <div class="slide-bg swiper-white-filter" style="background-image: url(&quot;{% static 'imgs/pg_inicial/slide-2-1920x720.png' %}&quot;)"></div>
+                <div class="slide-bg swiper-white-filter" style="background-image: url(&quot;{% static 'imgs/page_inicial/slide-2-1920x720.png' %}&quot;)"></div>
                 <div class="swiper-slide-caption section-md">
                 <div class="container">
                     <div class="row">
@@ -95,7 +91,7 @@
                 </div>
             </div>
             <div class="swiper-slide slide-bg-3">
-                <div class="slide-bg swiper-white-filter" style="background-image: url(&quot;{% static 'imgs/pg_inicial/slide-3-1920x720.png' %}&quot;)"></div>
+                <div class="slide-bg swiper-white-filter" style="background-image: url(&quot;{% static 'imgs/page_inicial/slide-3-1920x720.png' %}&quot;)"></div>
                 <div class="swiper-slide-caption section-md">
                 <div class="container">
                     <div class="row">
@@ -147,7 +143,7 @@
             <div class="container">
             <div class="row row-50 align-items-lg-center justify-content-xl-between">
                 <div class="col-lg-6 text-center">
-                <div class="block-parallax-element"><span class="prev-element" data-parallax-scroll="{&quot;y&quot;: -30, &quot;x&quot;: 0,  &quot;smoothness&quot;: 50 }"></span><img src="{% static 'imgs/pg_inicial/salon.png' %}" alt="" width="378" height="463"/><span class="next-element" data-parallax-scroll="{&quot;y&quot;: 30, &quot;x&quot;: 0,  &quot;smoothness&quot;: 50 }"></span>
+                <div class="block-parallax-element"><span class="prev-element" data-parallax-scroll="{&quot;y&quot;: -30, &quot;x&quot;: 0,  &quot;smoothness&quot;: 50 }"></span><img src="{% static 'imgs/page_inicial/salon.png' %}" alt="" width="378" height="463"/><span class="next-element" data-parallax-scroll="{&quot;y&quot;: 30, &quot;x&quot;: 0,  &quot;smoothness&quot;: 50 }"></span>
                 </div>
                 </div>
                 <div class="col-lg-6 col-xl-5">
@@ -179,11 +175,11 @@
                 <div class="box-images-classic">
                     <div class="row row-30">
                     <div class="col-6">
-                        <div class="box-image-item" data-parallax-scroll="{&quot;y&quot;: 0, &quot;x&quot;: -20,  &quot;smoothness&quot;: 30 }"><img src="{% static 'imgs/pg_inicial/homem1.jpg' %}" alt="" width="270" height="458"/>
+                        <div class="box-image-item" data-parallax-scroll="{&quot;y&quot;: 0, &quot;x&quot;: -20,  &quot;smoothness&quot;: 30 }"><img src="{% static 'imgs/page_inicial/homem1.jpg' %}" alt="" width="270" height="458"/>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="box-image-item" data-parallax-scroll="{&quot;y&quot;: 0, &quot;x&quot;: 20,  &quot;smoothness&quot;: 30 }"><img src="{% static 'imgs/pg_inicial/mulher1.jpg' %}" alt="" width="270" height="458"/>
+                        <div class="box-image-item" data-parallax-scroll="{&quot;y&quot;: 0, &quot;x&quot;: 20,  &quot;smoothness&quot;: 30 }"><img src="{% static 'imgs/page_inicial/mulher1.jpg' %}" alt="" width="270" height="458"/>
                         </div>
                     </div>
                     </div>
@@ -205,21 +201,21 @@
                 <!-- Owl Carousel-->
                 <div class="owl-carousel owl-carousel-center" data-items="1" data-md-items="3" data-xl-items="5" data-dots="false" data-nav="true" data-stage-padding="0" data-loop="true" data-margin="0" data-mouse-drag="false" data-center="true" data-autoplay="true" style="touch-action: none;">
                     <div class="team-minimal">
-                    <figure><img src="{% static 'imgs/pg_inicial/manicure.jpg' %}" alt="" width="370" height="370"></figure>
+                    <figure><img src="{% static 'imgs/page_inicial/manicure.jpg' %}" alt="" width="370" height="370"></figure>
                     <div class="team-minimal-caption">
                         <h4 class="team-title">Manicure e pedicure</h4>
                         <p>Procure entre os serviços disponiveis</p>
                     </div>
                     </div>
                     <div class="team-minimal">
-                    <figure><img src="{% static 'imgs/pg_inicial/service-pet.jpg' %}" alt="" width="370" height="370"></figure>
+                    <figure><img src="{% static 'imgs/page_inicial/service-pet.jpg' %}" alt="" width="370" height="370"></figure>
                     <div class="team-minimal-caption">
                         <h4 class="team-title">Dê um up no seu pet</h4>
                         <p>Encontre salões especializados em pets</p>
                     </div>
                     </div>
                     <div class="team-minimal">
-                    <figure><img src="{% static 'imgs/pg_inicial/team-3-370x370.jpg' %}" alt="" width="370" height="370"></figure>
+                    <figure><img src="{% static 'imgs/page_inicial/team-3-370x370.jpg' %}" alt="" width="370" height="370"></figure>
                     <div class="team-minimal-caption">
                         <h4 class="team-title">titulo</h4>
                         <p>Visagiste</p>
@@ -275,8 +271,8 @@
 {% endblock content %}
 
 {% block script %}
-    <script src="{% static 'js/pg_inicial/plugins.js' %}"></script>
+    <script src="{% static 'js/page_inicial/plugins.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.4.2/js/swiper.jquery.min.js" integrity="sha512-kZuRlVjyG3pnsZyFvfSlIeXQDOWRvZQo4+81+g+dybUUUHTgI9vtr1259r44u3X5cmlOP3+x5oSeAaMVfE1fyg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.2.1/owl.carousel.min.js" integrity="sha512-lo4YgiwkxsVIJ5mex2b+VHUKlInSK2pFtkGFRzHsAL64/ZO5vaiCPmdGP3qZq1h9MzZzghrpDP336ScWugUMTg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="{% static 'js/pg_inicial/script.js' %}"></script>
+    <script src="{% static 'js/page_inicial/script.js' %}"></script>
 {% endblock script %}

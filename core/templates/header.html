@@ -8,4 +8,11 @@
             <img src="https://via.placeholder.com/48x48" alt="logo">
         </a>
     </abbr>
+
+    {% if user.is_authenticated %}
+        <a href="{% url 'deslogar' %}">
+            <button type="button" class="btn btn-danger">Sair</button>
+        </a>
+    {% endif %}
+    
 </header>

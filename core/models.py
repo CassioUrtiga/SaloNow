@@ -1,23 +1,21 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Cliente(models.Model):
-    nome = models.CharField(max_length=50)
-    sobrenome = models.CharField(max_length=50)
-    cpf = models.CharField(max_length=14, primary_key=True)
-    email = models.EmailField(max_length=100)
-    senha = models.CharField(max_length=12)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    nome_completo = models.CharField(max_length=100, null=False)
+    sobrenome = models.CharField(max_length=50, default=None)
 
     def __str__(self) -> str:
-        return self.nome
+        return self.nome_completo
     
 
 class Proprietario(models.Model):
-    nome = models.CharField(max_length=50)
-    sobrenome = models.CharField(max_length=50)
-    cnpj = models.CharField(max_length=18, primary_key=True)
-    email = models.EmailField(max_length=100)
-    senha = models.CharField(max_length=12)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    nome_completo = models.CharField(max_length=100, null=False)
+    sobrenome = models.CharField(max_length=50, default=None)
+    cnpj = models.CharField(max_length=18)
 
     def __str__(self) -> str:
-        return self.nome
+        return self.nome_completo
     
