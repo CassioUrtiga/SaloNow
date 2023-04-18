@@ -14,7 +14,7 @@ body {
 	-webkit-font-smoothing: subpixel-antialiased;
 }
 
-button {
+.bot-style {
 	position: relative;
 	background: transparent;
 	color: black;
@@ -27,30 +27,31 @@ button {
 	transition: 0.2s;
 }
   
-button:hover {
+.bot-style:hover {
 	letter-spacing: 0.2rem;
 	padding: 1.1rem 3.1rem;
 	color: var(--clr);
 	animation: box 3s infinite;
 }
   
-button::before {
+.bot-style::before {
 	content: "";
 	position: absolute;
 	inset: 2px;
 }
   
-button span {
+.bot-style span {
 	position: relative;
 	z-index: 1;
 }
-button i {
+
+.bot-style i {
 	position: absolute;
 	inset: 0;
 	display: block;
 }
   
-button i::before {
+.bot-style i::before {
 	content: "";
 	position: absolute;
 	width: 10px;
@@ -58,17 +59,16 @@ button i::before {
 	left: 80%;
 	top: -2px;
 	border: 2px solid var(--clr);
-	
 	transition: 0.2s;
 }
   
-button:hover i::before {
+.bot-style:hover i::before {
 	width: 15px;
 	left: 20%;
 	animation: move 3s infinite;
 }
   
-button i::after {
+.bot-style i::after {
 	content: "";
 	position: absolute;
 	width: 10px;
@@ -79,7 +79,7 @@ button i::after {
 	transition: 0.2s;
 }
   
-button:hover i::after {
+.bot-style:hover i::after {
 	width: 15px;
 	left: 80%;
 	animation: move 3s infinite;
@@ -110,8 +110,7 @@ button:hover i::after {
 }
 
 header{
-	display: flex;
-	flex-wrap: wrap;
+    display: flex;
 	justify-content: space-between;
 	align-items: center;
 	padding: 15px;
@@ -123,6 +122,10 @@ header{
 header a{
 	text-decoration: none;
 	cursor: default;
+}
+
+.nav {
+	margin-left: auto;
 }
 
 .heading-decorate .divider {

@@ -1,0 +1,82 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{% static 'css/cadastro.css' %}">
+{% endblock css %}
+
+{% block title %}
+    <title>SaloNow-Cadastro</title>
+{% endblock title %}
+
+{% block content %}
+    <main>
+        <fieldset>
+            <abbr title="Voltar para a página inicial" style="text-decoration: none;">
+                <a href="{% url 'inicio' %}" style="text-decoration: none;">
+                    <h1>SaloNow</h1>
+                </a>
+            </abbr>
+            <p class="alinha">Cadastrar cliente</p>
+            {% for message in messages %}
+                {% if message.tags == 'warning' %}
+                    <div class="alert alert-warning alert-dismissible fade show config" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% elif message.tags == 'error' %}
+                    <div class="alert alert-danger alert-dismissible fade show config" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <form action="{% url 'cadastrar-cliente' %}" method="post" autocomplete="off">
+                {% csrf_token %}
+                <div class="form-floating">
+                    {{ form.nome_completo }}
+                    <label for="nome">Nome completo</label>
+                </div>
+                <div class="form-floating">
+                    {{ form.username }}
+                    <label for="username">Usuário</label>
+                </div>
+                <div class="form-floating">
+                    {{ form.email }}
+                    <label for="email">E-mail</label>
+                </div>
+                <div class="form-floating mb-3 d-flex align-items-center">
+                    {{ form.senha }}
+                    <label for="senha">Senha</label>
+                    <div class="input-group-append" style="margin-left: 25px;">
+                      <button class="btn btn-outline-secondary toggle-password" type="button">
+                        <i class="fa fa-fw fa-eye toggle-icon"></i>
+                      </button>
+                    </div>
+                </div>
+
+                <input type="submit" value="Cadastra-se" id="enviar" class="btn btn-success estado ajuste-input">
+            </form>
+        </fieldset>
+    </main>
+{% endblock content %}
+
+{% block script %}
+    <script>
+        $(document).ready(function() {
+        // Função que alterna a visibilidade da senha
+            $('.toggle-password').click(function() {
+                let passwordInput = $('#senha');
+                let passwordInputType = passwordInput.attr('type');
+                if (passwordInputType === 'password') {
+                passwordInput.attr('type', 'text');
+                $('.toggle-icon').removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                passwordInput.attr('type', 'password');
+                $('.toggle-icon').removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+            });
+        });
+    </script>
+{% endblock script %}
