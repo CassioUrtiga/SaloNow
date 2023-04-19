@@ -24,60 +24,43 @@
         </div>
     
         <div class="page">
-
-           
-           
-
         
-            <header class="section page-header navbar-fixed-top">
-                <div class="container">
-                  <nav class="navbar navbar-expand-lg ">
-                    <a class="navbar-brand d-flex align-items-center" href="#">
-                      <img src="https://via.placeholder.com/140x60" alt="SaloNow" class="d-inline-block">
-                      <h3 class="ml-3 mb-0">SALO NOW</h3>
-                    </a>
-                    {% if user.is_authenticated %}
+        <header>
+            <a href="{% url 'inicio' %}" style="cursor: pointer;">
+                <img src="https://via.placeholder.com/140x60" alt="SaloNow">
+            </a>
+            <h3>SALONOW</h3>
+            <div>
+                {% if user.is_authenticated %}
                     <a href="{% url 'principal' %}">
                         <button type="button" class="btn btn-primary">Página principal</button>
                     </a>
                     <a href="{% url 'deslogar' %}">
                         <button type="button" class="btn btn-danger">Sair</button>
                     </a>
-                    {% else %}
-                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-                            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                      <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                        
-                      <div class="btn-group">
+                {% else %}
+                    <div style="display: inline-block; margin-right: 10px;">
                         <a href="{% url 'login' %}">
-                          <button style="--clr:#39FF14">
-                            <span>Login</span>
-                            <i></i>
-                          </button>
+                        <button class="bot-style" style="--clr:#39FF14"><span>Login</span><i></i></button>
                         </a>
-                        <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="--clr:#8A2BE2">
-                          <span>Cadastre-se</span>
-                          <i></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                          <li><a class="dropdown-item" href="{% url 'cadastrar-cliente' %}">Cliente</a></li>
-                          <li><a class="dropdown-item" href="{% url 'cadastrar-proprietario' %}">Proprietário</a></li>
-                        </ul>
-                      </div>
                     </div>
-                  </nav>
-                  {% endif %}
-
-                </div>
-              </header>
-              
-                       
-              
+                    <div style="display: inline-block;">
+                        <div class="dropdown">
+                        <button class="dropdown-toggle bot-style" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="--clr:#8A2BE2">
+                            <span>Cadastre-se</span><i></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'cadastrar-cliente' %}">Cliente</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cadastrar-proprietario' %}">Proprietário</a></li>
+                        </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </header>
 
         <!-- Swiper -->
-        <section class="section swiper-container swiper-slider swiper-slider-1 slider-scale-effect" data-loop="false" data-autoplay="5500" data-simulate-touch="false" data-slide-effect="fade">
+        <section class="section swiper-container swiper-slider swiper-slider-1 slider-scale-effect" data-loop="false" data-autoplay="5500" data-simulate-touch="false" data-slide-effect="fade" style="margin-top: 5.6em;">
             <div class="swiper-wrapper">
             <div class="swiper-slide slide-bg-1">
                 <div class="slide-bg swiper-white-filter" style="background-image: url(&quot;{% static 'imgs/page_inicial/salon1.png' %}&quot;)"></div>
@@ -113,9 +96,10 @@
                 <div class="container">
                     <div class="row">
                     <div class="col-md-10 col-lg-8 col-xl-7">
-                        <h1 class="heading-decorate" data-caption-animate="fadeInUp" data-caption-delay="100">Descubra a beleza que você merece aqui!</h1>
+                        <h1 class="heading-decorate" data-caption-animate="fadeInUp" 
+                        data-caption-delay="100">Descubra<br><span class="divider"></span>Serviços de salões
                         </h1>
-                        <p class="lead" data-caption-animate="fadeInUp" data-caption-delay="250">Mude sua aparência e renove sua autoestima em nossos salões de belezas.</p>
+                        <p class="lead" data-caption-animate="fadeInUp" data-caption-delay="250">Mude sua aparência e renove sua autoestima em nossos salões de belezas especializados em diversas áreas.</p>
                     </div>
                     </div>
                 </div>
@@ -160,16 +144,11 @@
             <div class="container">
               <div class="row row-50 align-items-lg-center justify-content-xl-between">
                 <div class="col-lg-6 text-center">
-<<<<<<< HEAD:core/templates/page_inicial/pg_inicial.html
                   <div class="block-parallax-element">
                     <span class="prev-element" data-parallax-scroll="{&quot;y&quot;: -30, &quot;x&quot;: 0,  &quot;smoothness&quot;: 50 }"></span>
-                    <img src="{% static 'imgs/pg_inicial/salon.png' %}" alt="" width="378" height="463"/>
+                    <img src="{% static 'imgs/page_inicial/salon.png' %}" alt="" width="378" height="463"/>
                     <span class="next-element" data-parallax-scroll="{&quot;y&quot;: 30, &quot;x&quot;: 0,  &quot;smoothness&quot;: 50 }"></span>
                   </div>
-=======
-                <div class="block-parallax-element"><span class="prev-element" data-parallax-scroll="{&quot;y&quot;: -30, &quot;x&quot;: 0,  &quot;smoothness&quot;: 50 }"></span><img src="{% static 'imgs/page_inicial/salon.png' %}" alt="" width="378" height="463"/><span class="next-element" data-parallax-scroll="{&quot;y&quot;: 30, &quot;x&quot;: 0,  &quot;smoothness&quot;: 50 }"></span>
-                </div>
->>>>>>> develop:core/templates/page/inicial.html
                 </div>
                 <div class="col-lg-6 col-xl-5">
                   <h2 class="heading-decorate"><span class="divider"></span>Sobre nós</h2>
