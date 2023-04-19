@@ -8,7 +8,7 @@ body {
 	font-size: 16px;
 	line-height: 1.5;
 	font-weight: 400;
-	color: #9b9b9b;
+	color: #aaa2a2;
 	background-color: #ffffff;
 	-webkit-text-size-adjust: none;
 	-webkit-font-smoothing: subpixel-antialiased;
@@ -105,29 +105,105 @@ body {
 	  box-shadow: 0 0 25px var(--clr);
 	}
 	100% {
-	  box-shadow: #27272c;
+	  box-shadow: #4c4c50;
 	}
 }
 
 header{
-    display: flex;
+	position: fixed;
+	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	padding: 15px;
 	margin-bottom: 1em;
 	background-color: #cef1ea;
 	box-shadow: 1px 10px 15px rgba(0, 0, 0, 0.300);
-}
-
-header a{
+	z-index: 9999;
+	width: 100%;
+	height: 80px;
+  }
+  
+  header a{
 	text-decoration: none;
 	cursor: default;
+  }
+  
+  
+  /* Define o estilo do logotipo e do nome da página */
+  .navbar-brand img {
+	height: 40px;
+	margin-right: 10px;
+	margin-left: -80px;
+  }
+  
+  .navbar-brand h3 {
+	font-size: 24px;
+	font-weight: bold;
+	margin: 0;
+  }
+  
+  /* Define o estilo do botão de menu responsivo */
+  .navbar-toggler {
+	border: none;
+	background-color: transparent;
+  }
+  .navbar-nav {
+	float: right;
+  }
+  
+  .navbar-nav .btn-group {
+	margin-left: 10px;
+  }
+  
+  
+  /* Define o estilo do botão de login */
+  /* Define o estilo do botão "Login" */
+  .navbar .btn-group a:first-child button {
+	left: 50px;
+	background-color: #39ff14;
+	color: #fff;
+	border-radius: 20px;
+	padding: 8px 20px;
+	font-weight: bold;
+	 /* Adiciona essa linha para mover o botão "Login" para a direita */
+	 /* Adiciona essa linha para mover o botão "Login" ainda mais para a direita */
+  }
+  
+  /* Define o estilo do botão "Cadastre-se" */
+  .navbar .btn-group button.dropdown-toggle {
+	
+    left: 60px;
+	background-color: #8a2be2;
+	color: #fff;
+	border: none;
+	border-radius: 20px;
+	padding: 8px 20px;
+	font-weight: bold;
+ /* Adiciona essa linha para mover o botão "Cadastre-se" para a direita */
+	margin-left: 10px; /* Adiciona essa linha para mover o botão "Cadastre-se" ainda mais para a direita */
+  }
+  
+  /* Define o estilo da lista suspensa de opções "Cadastre-se" */
+ /* Center the dropdown menu within the "Registre-se" button */
+ .navbar .dropdown-menu {
+	left: 90%;
+	transform: translateX(-50%);
+	width: 90px;
 }
 
-.nav {
-	margin-left: auto;
+/* Center the dropdown menu options */
+.navbar .dropdown-menu a {
+	display: block;
+	text-align: center;
+	margin: 0;
+	padding: 8px 16px;
 }
 
+  
+  
+  .navbar .dropdown-menu a:hover {
+	background-color: #f8f9fa;
+  }
 .heading-decorate .divider {
 	display: none;
 	vertical-align: super;
