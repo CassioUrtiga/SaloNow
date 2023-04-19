@@ -2,20 +2,58 @@
 {% load static %}
 
 {% block css %}
-    
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
 {% endblock css %}
 
 {% block title %}
-    <title>SaloNow-Login</title>
+  <title>SaloNow-Login</title>
 {% endblock title %}
 
 {% block content %}
-
-    {% include '../header.html' %}
-    <h1>tela de login</h1>
-    
+  <main>
+    <fieldset>
+      <h1><a href="{% url 'inicio' %}">SaloNow</a></h1>
+      {% for message in messages %}
+        {% if message.tags == 'error' %}
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% elif message.tags == 'success' %}
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endif %}
+      {% endfor %}
+      <span class="padding-bottom-top">Entre na sua conta</span>
+      <form action="{% url 'login' %}" method="post" autocomplete="off">
+        {% csrf_token %}
+        <div class="field padding-bottom--24">
+          <label for="pessoa">Usuário ou Email</label>
+          <input type="text" name="usuario" required>
+        </div>
+        <div class="field padding-bottom--24">
+          <div class="reset-pass">
+            <label for="senha">Senha</label>
+            <a href="#">Esqueceu a senha?</a>
+          <div>
+        </div>
+        </div>
+          <input type="password" name="senha" maxlength="12" minlength="8" required>
+        </div>
+        <div class="field padding-bottom--24">
+          <input type="submit" name="submit" value="Continuar">
+        </div>
+      </form>
+      <div class="footer-link">
+        <span>Cliente e não tem uma conta? <a href="{% url 'cadastrar-cliente' %}">Cadastre-se</a></span>
+        <span>Proprietário e não tem uma conta? <a href="{% url 'cadastrar-proprietario' %}">Cadastre-se</a></span>
+        <div class="listing padding-bottom--24 flex-flex center-center" style="margin-top: 20px;">
+          <span><a href="#">© SaloNow</a></span>
+          <span><a href="#">Contato</a></span>
+        </div>
+      </div>
+    </fieldset>
+  </main>
 {% endblock content %}
-
-{% block script %}
-    
-{% endblock script %}
