@@ -3,7 +3,7 @@
 
 {% block css %}
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato:300i,400,400i,700%7CMontserrat:400,500,600,700%7CPlayfair+Display:400,700,700i%7COswald:400,700,700i">
-    <link rel="stylesheet" href="{% static 'css/pg_inicial.css' %}">
+    <link rel="stylesheet" href="{% static 'css/page_inicial.css' %}">
 {% endblock css %}
 
 {% block title %}
@@ -24,62 +24,82 @@
         </div>
     
         <div class="page">
-
-        <header class="section page-header">
-            <img src="https://via.placeholder.com/140x60" alt="SaloNow">
-           
-            <h3>Sejam bem-vindos</h3>
-            
+        
+        <header>
+            <a href="{% url 'inicio' %}" style="cursor: pointer;">
+                <img src="https://via.placeholder.com/140x60" alt="SaloNow">
+            </a>
+            <h3>SALONOW</h3>
             <div>
-                <a href="{% url 'login' %}">
-                    <button style="--clr:#39FF14"><span>Login</span><i></i></button>
-                </a>
-                <a href="{% url 'cadastrar' %}">
-                    <button style="--clr:#8A2BE2"><span>Cadastre-se</span><i></i></button>
-                </a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'principal' %}">
+                        <button type="button" class="btn btn-primary">Página principal</button>
+                    </a>
+                    <a href="{% url 'deslogar' %}">
+                        <button type="button" class="btn btn-danger">Sair</button>
+                    </a>
+                {% else %}
+                    <div style="display: inline-block; margin-right: 10px;">
+                        <a href="{% url 'login' %}">
+                        <button class="bot-style" style="--clr:#39FF14"><span>Login</span><i></i></button>
+                        </a>
+                    </div>
+                    <div style="display: inline-block;">
+                        <div class="dropdown">
+                        <button class="dropdown-toggle bot-style" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="--clr:#8A2BE2">
+                            <span>Cadastre-se</span><i></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'cadastrar-cliente' %}">Cliente</a></li>
+                            <li><a class="dropdown-item" href="{% url 'cadastrar-proprietario' %}">Proprietário</a></li>
+                        </ul>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </header>
 
         <!-- Swiper -->
-        <section class="section swiper-container swiper-slider swiper-slider-1 slider-scale-effect" data-loop="false" data-autoplay="5500" data-simulate-touch="false" data-slide-effect="fade">
+        <section class="section swiper-container swiper-slider swiper-slider-1 slider-scale-effect" data-loop="false" data-autoplay="5500" data-simulate-touch="false" data-slide-effect="fade" style="margin-top: 5.6em;">
             <div class="swiper-wrapper">
             <div class="swiper-slide slide-bg-1">
-                <div class="slide-bg swiper-white-filter" style="background-image: url(&quot;{% static 'imgs/pg_inicial/salon1.png' %}&quot;)"></div>
+                <div class="slide-bg swiper-white-filter" style="background-image: url(&quot;{% static 'imgs/page_inicial/salon1.png' %}&quot;)"></div>
                 <div class="swiper-slide-caption section-md">
                 <div class="container">
                     <div class="row">
                     <div class="col-sm-10 col-lg-8 col-xl-7">
-                        <h1 class="heading-decorate" data-caption-animate="fadeInUp" data-caption-delay="100">Glory Beauty Salon<br><span class="divider"></span>Beauty as a gift
+                        <h1 class="heading-decorate" data-caption-animate="fadeInUp" data-caption-delay="100">Descubra a praticidade<br><span class="divider"></span>cuidar da sua beleza.
                         </h1>
-                        <p class="lead" data-caption-animate="fadeInUp" data-caption-delay="250">Glory Beauty Salon offers the latest and highest quality services for you and all your family members. We specialize in all beauty treatments and our team is fully professional and innovative, from makeup services to hairstyling.</p>
+                        <p class="lead" data-caption-animate="fadeInUp" data-caption-delay="250">Não perca mais tempo procurando salões de beleza. conheça nossos parceiros e tenha acesso a diversos serviços de beleza em um só lugar.</p>
                     </div>
                     </div>
                 </div>
                 </div>
             </div>
             <div class="swiper-slide slide-bg-2">
-                <div class="slide-bg swiper-white-filter" style="background-image: url(&quot;{% static 'imgs/pg_inicial/slide-2-1920x720.png' %}&quot;)"></div>
+                <div class="slide-bg swiper-white-filter" style="background-image: url(&quot;{% static 'imgs/page_inicial/slide-2-1920x720.png' %}&quot;)"></div>
                 <div class="swiper-slide-caption section-md">
                 <div class="container">
                     <div class="row">
                     <div class="col-md-10 col-lg-8 col-xl-7">
-                        <h1 class="heading-decorate" data-caption-animate="fadeInUp" data-caption-delay="100">Experience the Best<br><span class="divider"></span>Beauty Services
+                        <h1 class="heading-decorate" data-caption-animate="fadeInUp" data-caption-delay="100">Experimente o melhor <br><span class="divider"></span>Serviços de salões
                         </h1>
-                        <p class="lead" data-caption-animate="fadeInUp" data-caption-delay="250">We offer a full range of hairdressing services for men and women, eyebrow and eyelash care, the services of make-up artists and stylists. Entrust your beauty to professionals who really care about your style and look!</p>
+                        <p class="lead" data-caption-animate="fadeInUp" data-caption-delay="250">Oferecemos uma gama completa de serviços de beleza. Confie sua beleza a profissionais que realmente se importam com o seu estilo e visual!</p>
                     </div>
                     </div>
                 </div>
                 </div>
             </div>
             <div class="swiper-slide slide-bg-3">
-                <div class="slide-bg swiper-white-filter" style="background-image: url(&quot;{% static 'imgs/pg_inicial/slide-3-1920x720.png' %}&quot;)"></div>
+                <div class="slide-bg swiper-white-filter" style="background-image: url(&quot;{% static 'imgs/page_inicial/slide-3-1920x720.png' %}&quot;)"></div>
                 <div class="swiper-slide-caption section-md">
                 <div class="container">
                     <div class="row">
                     <div class="col-md-10 col-lg-8 col-xl-7">
-                        <h1 class="heading-decorate" data-caption-animate="fadeInUp" data-caption-delay="100">Professional Beauty <br><span class="divider"></span>Care for Everyone
+                        <h1 class="heading-decorate" data-caption-animate="fadeInUp" 
+                        data-caption-delay="100">Descubra<br><span class="divider"></span>Serviços de salões
                         </h1>
-                        <p class="lead" data-caption-animate="fadeInUp" data-caption-delay="250">Our beauty salon treatments will help you relax after a long and stressful day. At Glory, you can pamper yourself and enjoy the benefits of professional and affordable beauty care. Enjoy your life with our high-quality beauty services.</p>
+                        <p class="lead" data-caption-animate="fadeInUp" data-caption-delay="250">Mude sua aparência e renove sua autoestima em nossos salões de belezas especializados em diversas áreas.</p>
                     </div>
                     </div>
                 </div>
@@ -122,45 +142,43 @@
     
         <section class="section section-lg bg-gray-100">
             <div class="container">
-            <div class="row row-50 align-items-lg-center justify-content-xl-between">
+              <div class="row row-50 align-items-lg-center justify-content-xl-between">
                 <div class="col-lg-6 text-center">
-                <div class="block-parallax-element"><span class="prev-element" data-parallax-scroll="{&quot;y&quot;: -30, &quot;x&quot;: 0,  &quot;smoothness&quot;: 50 }"></span><img src="{% static 'imgs/pg_inicial/salon.png' %}" alt="" width="378" height="463"/><span class="next-element" data-parallax-scroll="{&quot;y&quot;: 30, &quot;x&quot;: 0,  &quot;smoothness&quot;: 50 }"></span>
-                </div>
+                  <div class="block-parallax-element">
+                    <span class="prev-element" data-parallax-scroll="{&quot;y&quot;: -30, &quot;x&quot;: 0,  &quot;smoothness&quot;: 50 }"></span>
+                    <img src="{% static 'imgs/page_inicial/salon.png' %}" alt="" width="378" height="463"/>
+                    <span class="next-element" data-parallax-scroll="{&quot;y&quot;: 30, &quot;x&quot;: 0,  &quot;smoothness&quot;: 50 }"></span>
+                  </div>
                 </div>
                 <div class="col-lg-6 col-xl-5">
-                <h2 class="heading-decorate">Why Our Clients <br><span class="divider"></span>Choose Us
-                </h2>
-                <p class="big text-gray-800">
-                    We are the leading beauty salon in LA providing high-quality hairdressing, makeup, and skin care services to everyone.
-                </p>
-                <p class="text-spacing-60">
-                    Our clients appreciate and value our level of customer service, the skills of our stylists and estheticians as well as our professional approach to everything we do.
-                </p>
+                  <h2 class="heading-decorate"><span class="divider"></span>Sobre nós</h2>
+                  <p class="big text-gray-800">
+                    Nosso site de gerenciamento de salões de beleza foi criado com o objetivo de conectar clientes com salões de beleza de qualidade. Queremos tornar mais fácil para você encontrar os melhores salões especializados , e garantir que você obtenha os serviços que precisa para se sentir e parecer incrível.
+                  </p>
                 </div>
+              </div>
             </div>
-            </div>
-        </section>
+          </section>
     
         <section class="section section-lg bg-default">
             <div class="container">
             <div class="row row-50 align-items-lg-center justify-content-xl-between">
                 <div class="col-lg-6">
                 <div class="block-xs">
-                    <h2 class="heading-decorate">Uma variedade de<br><span class="divider"></span>serviços
+                    <h2 class="heading-decorate">Agendamento de<br><span class="divider"></span>Serviços
                     </h2>
-                    <p class="big text-gray-800">We offer a full range of salon treatments and styling services provided by a team of professional stylists, all in a clean air environment.</p>
-                    <p>Our estheticians and stylists can make your hair look just the way you want. Be it a hair extension, coloring, or styling, we can do it all to make you look incredibly attractive.</p>
+                    <p class="big text-gray-800"> Nosso site torna mais fácil agendar os serviços que você precisa em um salão de beleza próximo. Basta ver os serviços disponíveis e agendar o horário que melhor se adequa à sua agenda. Com o nosso sistema de agendamento online , você pode agendar seus serviços de beleza a qualquer hora e em qualquer lugar, tanto para homens quanto para mulheres. </p>
                 </div>
                 </div>
                 <div class="col-lg-6">
                 <div class="box-images-classic">
                     <div class="row row-30">
                     <div class="col-6">
-                        <div class="box-image-item" data-parallax-scroll="{&quot;y&quot;: 0, &quot;x&quot;: -20,  &quot;smoothness&quot;: 30 }"><img src="{% static 'imgs/pg_inicial/homem1.jpg' %}" alt="" width="270" height="458"/>
+                        <div class="box-image-item" data-parallax-scroll="{&quot;y&quot;: 0, &quot;x&quot;: -20,  &quot;smoothness&quot;: 30 }"><img src="{% static 'imgs/page_inicial/homem1.jpg' %}" alt="" width="270" height="458"/>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="box-image-item" data-parallax-scroll="{&quot;y&quot;: 0, &quot;x&quot;: 20,  &quot;smoothness&quot;: 30 }"><img src="{% static 'imgs/pg_inicial/mulher1.jpg' %}" alt="" width="270" height="458"/>
+                        <div class="box-image-item" data-parallax-scroll="{&quot;y&quot;: 0, &quot;x&quot;: 20,  &quot;smoothness&quot;: 30 }"><img src="{% static 'imgs/page_inicial/mulher1.jpg' %}" alt="" width="270" height="458"/>
                         </div>
                     </div>
                     </div>
@@ -174,7 +192,7 @@
             <div class="container">
             <h2>Algums serviços que pode encontrar</h2>
             <div class="divider-lg"></div>
-            <p class="block-lg">We employ the best experts in the beauty industry and educate our own award-winning specialists through constant training. Here are the most prominent talents of our team who make your beauty dreams come true.</p>
+            <p class="block-lg">.Em nosso site, você pode encontrar uma variedade de serviços de beleza oferecidos por salões de beleza especializados em diferentes áreas. Desde cortes de cabelo, manicure, pedicure e etc. Descubra todas as opções disponíveis e agende seu próximo tratamento de beleza agora mesmo</p>
             </div>
             <div class="container">
             <div class="row row-20">
@@ -182,52 +200,52 @@
                 <!-- Owl Carousel-->
                 <div class="owl-carousel owl-carousel-center" data-items="1" data-md-items="3" data-xl-items="5" data-dots="false" data-nav="true" data-stage-padding="0" data-loop="true" data-margin="0" data-mouse-drag="false" data-center="true" data-autoplay="true" style="touch-action: none;">
                     <div class="team-minimal">
-                    <figure><img src="{% static 'imgs/pg_inicial/manicure.jpg' %}" alt="" width="370" height="370"></figure>
+                    <figure><img src="{% static 'imgs/page_inicial/manicure.jpg' %}" alt="" width="370" height="370"></figure>
                     <div class="team-minimal-caption">
                         <h4 class="team-title">Manicure e pedicure</h4>
                         <p>Procure entre os serviços disponiveis</p>
                     </div>
                     </div>
                     <div class="team-minimal">
-                    <figure><img src="{% static 'imgs/pg_inicial/service-pet.jpg' %}" alt="" width="370" height="370"></figure>
+                    <figure><img src="{% static 'imgs/page_inicial/service-pet.jpg' %}" alt="" width="370" height="370"></figure>
                     <div class="team-minimal-caption">
                         <h4 class="team-title">Dê um up no seu pet</h4>
                         <p>Encontre salões especializados em pets</p>
                     </div>
                     </div>
                     <div class="team-minimal">
-                    <figure><img src="{% static 'imgs/pg_inicial/team-3-370x370.jpg' %}" alt="" width="370" height="370"></figure>
+                    <figure><img src="{% static 'imgs/page_inicial/team-3-370x370.jpg' %}" alt="" width="370" height="370"></figure>
                     <div class="team-minimal-caption">
-                        <h4 class="team-title">titulo</h4>
-                        <p>Visagiste</p>
+                        <h4 class="team-title">Sobrancelhas</h4>
+                        <p>Design de sobrancelhas</p>
                     </div>
                     </div>
                     <div class="team-minimal">
                     <figure><img src="images/team-4-370x370.jpg" alt="" width="370" height="370"></figure>
                     <div class="team-minimal-caption">
-                        <h4 class="team-title">titulo</h4>
-                        <p>Cosmetologist</p>
+                        <h4 class="team-title">Corte de cabelo</h4>
+                        <p>Renove seu visual com cortes estilosos</p>
                     </div>
                     </div>
                     <div class="team-minimal">
                     <figure><img src="images/team-5-370x370.jpg" alt="" width="370" height="370"></figure>
                     <div class="team-minimal-caption">
-                        <h4 class="team-title">titulo</h4>
-                        <p>Manicurist</p>
+                        <h4 class="team-title">Maquiagem</h4>
+                        <p>Realce sua beleza com maquiagens</p>
                     </div>
                     </div>
                     <div class="team-minimal">
                     <figure><img src="images/team-6-370x370.png" alt="" width="370" height="370"></figure>
                     <div class="team-minimal-caption">
-                        <h4 class="team-title">titulo</h4>
-                        <p>Esthetician</p>
+                        <h4 class="team-title">Coloração</h4>
+                        <p>Dê vida ao seu cabelo com cores vibrantes</p>
                     </div>
                     </div>
                     <div class="team-minimal">
                     <figure><img src="images/team-7-370x370.png" alt="" width="370" height="370"></figure>
                     <div class="team-minimal-caption">
-                        <h4 class="team-title">titulo</h4>
-                        <p>Hair Colorist</p>
+                        <h4 class="team-title">Barba e bigode</h4>
+                        <p>Mude o visual com nossos serviços de barbearia.</p>
                     </div>
                     </div>
                 </div>
@@ -235,16 +253,15 @@
             </div>
             </div>
         </section>
-    
-        <footer>
-            <h1>rodapé</h1>
-        </footer>
+        
+          
     </main>
+    
 {% endblock content %}
 
 {% block script %}
-    <script src="{% static 'js/pg_inicial/plugins.js' %}"></script>
+    <script src="{% static 'js/page_inicial/plugins.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.4.2/js/swiper.jquery.min.js" integrity="sha512-kZuRlVjyG3pnsZyFvfSlIeXQDOWRvZQo4+81+g+dybUUUHTgI9vtr1259r44u3X5cmlOP3+x5oSeAaMVfE1fyg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.2.1/owl.carousel.min.js" integrity="sha512-lo4YgiwkxsVIJ5mex2b+VHUKlInSK2pFtkGFRzHsAL64/ZO5vaiCPmdGP3qZq1h9MzZzghrpDP336ScWugUMTg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="{% static 'js/pg_inicial/script.js' %}"></script>
+    <script src="{% static 'js/page_inicial/script.js' %}"></script>
 {% endblock script %}
