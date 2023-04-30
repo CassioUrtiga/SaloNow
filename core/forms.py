@@ -1,8 +1,12 @@
 from django import forms
-from .models import Cliente, Proprietario
+from .models import Cliente, Proprietario, Salon
 
 
 class FormularioCliente(forms.ModelForm):
+    class Meta:
+        model = Cliente
+        fields = ('nome_completo', 'username' ,'email', 'senha', 'foto_perfil')
+
     nome_completo = forms.CharField(required=True, max_length=100, widget=forms.TextInput(attrs={
         'id': 'nome',
         'class': 'form-control',
@@ -32,12 +36,12 @@ class FormularioCliente(forms.ModelForm):
         'placeholder': 'Senha'
     }))
 
-    class Meta:
-        model = Cliente
-        fields = ('nome_completo', 'username' ,'email', 'senha')
-
 
 class FormularioProprietario(forms.ModelForm):
+    class Meta:
+        model = Proprietario
+        fields = ('nome_completo', 'cnpj', 'username', 'email', 'senha', 'foto_perfil')
+
     nome_completo = forms.CharField(required=True, max_length=100, widget=forms.TextInput(attrs={
         'id': 'nome',
         'class': 'form-control',
@@ -75,6 +79,63 @@ class FormularioProprietario(forms.ModelForm):
         'placeholder': 'Senha'
     }))
 
+class FormularioSalao(forms.ModelForm):
     class Meta:
-        model = Proprietario
-        fields = ('nome_completo', 'cnpj', 'username', 'email', 'senha')
+        model = Salon
+        fields = ('nome_salao', 'descricao', 'salao_image', 'cidade', 'rua', 'pais', 'bairro', 'numero')
+    
+    nome_salao = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
+        'id': 'salon-name',
+        'class': 'form-control',
+        'name': 'salon-name',
+        'placeholder': 'Nome do salão',
+    }))
+
+    descricao = forms.CharField(widget=forms.Textarea(attrs={
+        'id': 'desc-salon',
+        'class': 'form-control',
+        'name': 'desc-salon',
+        'placeholder': 'Informe a descrição e caracteríticas do seu salão',
+        'rows': 4,
+        'cols': 40,
+        'style': 'resize: none;'
+    }))
+
+    cidade = forms.CharField(max_length=30, widget=forms.TextInput(attrs={
+        'id': 'city',
+        'class': 'form-control',
+        'name': 'city',
+        'placeholder': 'Cidade',
+    }))
+
+    pais = forms.CharField(max_length=30, widget=forms.TextInput(attrs={
+        'id': 'pais',
+        'class': 'form-control',
+        'name': 'pais',
+        'placeholder': 'País',
+    }))
+
+    rua = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
+        'id': 'rua',
+        'class': 'form-control',
+        'name': 'rua',
+        'placeholder': 'Rua',
+    }))
+
+    bairro = forms.CharField(max_length=30, widget=forms.TextInput(attrs={
+        'id': 'bairro',
+        'class': 'form-control',
+        'name': 'bairro',
+        'placeholder': 'Bairro',
+    }))
+
+    numero = forms.IntegerField(widget=forms.NumberInput(attrs={
+        'id': 'num-salon',
+        'class': 'form-control',
+        'name': 'num-salon',
+        'placeholder': 'Número',
+        'min': 0,
+        'max': 1000,
+        'style': 'width: 6.2em;'
+    }))
+    
