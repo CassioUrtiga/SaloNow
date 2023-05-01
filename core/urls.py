@@ -1,5 +1,6 @@
 from django.urls import path
 
+
 from .views import tela_inicial, tela_principal, login_view, cadastrar_cliente, cadastrar_proprietario, aguardar, logout_view, criar_salao, excluirSalao, filtrar_salao
 
 urlpatterns = [

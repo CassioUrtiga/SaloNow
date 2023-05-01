@@ -122,6 +122,7 @@ def cadastrar_proprietario(request):
         return render(request, 'page_login/cadastro_proprietario.html', {'form': FormularioProprietario()})
 
 def tela_principal(request):
+    verifica = True
     if not request.user.is_authenticated:
         return redirect('login')
     
