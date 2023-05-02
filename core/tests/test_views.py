@@ -1,12 +1,10 @@
 from model_mommy import mommy
 from core.views import verificar_formato_email
 from django.urls import reverse
-from django.contrib.auth.models import AnonymousUser
-from ..views import login_view
-from django.test import TestCase, Client, RequestFactory
+from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from core.models import Cliente, Salon, Proprietario, DiasFuncionamento, Servicos
-from core.forms import FormularioCliente, FormularioSalao
+from core.forms import FormularioSalao
 import datetime
 
 class VerificarFormatoEmailTestCase(TestCase):
@@ -21,7 +19,7 @@ class VerificarFormatoEmailTestCase(TestCase):
         resultado = verificar_formato_email(email)
         self.assertFalse(resultado)
 
-class LogoutViewTestCase(TestCase):
+class LogoutTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         self.user = mommy.make(User)
@@ -196,36 +194,28 @@ class FiltrarSalaoTestCase(TestCase):
         self.assertNotContains(response, 'Rio de Janeiro')
         self.assertNotContains(response, 'Belo Horizonte')
 
-class LoginTestViews(TestCase):
-    
+class LoginTestCase(TestCase):
+
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user('carlos', 'carlos@gmail.com', 'carlospass')
         self.login_url = reverse('login')
-    # Verifica se a página de login pode ser acessada com sucesso
+    
     def testLogin(self):
         self.client.login(username='carlos', password='carlospass')
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)    
 
-    # Envia uma solicitação POST com usuário e senha inválidos
     def test_login_view_post_failure(self):
         response = self.client.post(self.login_url, {'usuario': 'usuario_teste', 'senha': 'senha_incorreta'})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'page_login/login.html')
 
     def test_login_view_post_invalid_password(self):
-        # cria um usuário com email válido e senha inválida
-        user = User.objects.create_user(username='carlosvini', email='carlos@exemplo.com', password='password')
-
-        # envia solicitação POST com senha incorreta
+        self.user = User.objects.create_user(username='carlosvini', email='carlos@exemplo.com', password='password')
         login_data = {'usuario': 'carlos@exemplo.com', 'senha': 'wrongpassword'}
         response = self.client.post(reverse('login'), data=login_data, follow=True)
-
-        # verifica se a resposta tem status code 200
         self.assertEqual(response.status_code, 200)
-
-        # verifica se a mensagem de erro é exibida corretamente
         messages = list(response.context.get('messages'))
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), 'Usuário ou senha incorreta')
