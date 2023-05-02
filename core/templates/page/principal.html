@@ -2,7 +2,13 @@
 {% load static %}
 
 {% block css %}
-   
+    {% if cliente %}
+        <link rel="stylesheet" href="{% static 'css/principal_cliente.css' %}">
+    {% else %}
+        <link rel="stylesheet" href="{% static 'css/principal_proprietario.css' %}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+    {% endif %}
 {% endblock css %}
 
 {% block title %}
@@ -10,10 +16,388 @@
 {% endblock title %}
 
 {% block content %}
-    {% include 'header.html' %}
-    <h1>tela principal</h1>
+
+    {% if cliente %}
+        <h1>cliente</h1>
+    {% else %}
+        <header>
+            <abbr title="Página inicial">
+                <a href="{% url 'inicio' %}">
+                    <img src="https://via.placeholder.com/100x48" alt="logo">
+                </a>
+            </abbr>
+            <h3>{{ proprietario.nome_completo|title }}</h3>
+            <a href="{% url 'deslogar' %}">
+                <button type="button" class="btn btn-danger">Sair</button>
+            </a>
+        </header>
+        <!-- Modal add salon -->
+        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Acidionar salão</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{% url 'criar-salao' %}" method="post" enctype="multipart/form-data" autocomplete="off">
+                            {% csrf_token %}
+                            <h3>Características do salão</h3>
+                            {{ form.salao_image }}
+                            <div class="form-floating mb-2">
+                                {{ form.nome_salao }}
+                                <label for="salon-name">Nome do salão</label>
+                            </div>
+                            <div class="mb-2">
+                                {{ form.descricao }}
+                            </div>
+                            <h3>Localidade</h3>
+                            <div class="form-floating mb-2">
+                                {{ form.cidade }}
+                                <label for="city">Cidade</label>
+                            </div>
+                            <div class="form-floating mb-2">
+                                {{ form.pais }}
+                                <label for="pais">País</label>
+                            </div>
+                            <div class="form-floating mb-2">
+                                {{ form.rua }}
+                                <label for="rua">Rua</label>
+                            </div>
+                            <div class="form-floating mb-2">
+                                {{ form.bairro }}
+                                <label for="bairro">Bairro</label>
+                            </div>
+                            <div class="mb-2">
+                                {{ form.numero }}
+                            </div>   
+                            <h3>Serviços disponíveis</h3>
+                            <div>
+                                <button id="add-button" class="btn btn-primary mb-3"><i class="fas fa-plus"></i> Adicionar serviço</button>
+                                <div id="input-container"></div>
+                            </div>
+                            <h3>Dias de funcionamento</h3>
+                            <div>
+                                <div>
+                                    <label for="segunda">
+                                        <input type="checkbox" name="segunda" id="segunda" value="Segunda-feira">
+                                        Segunda-feira
+                                    </label>
+                                    <label for="temp_aberto_seg">
+                                        Abertura
+                                        <input type="time" name="temp_aberto_seg" id="temp_aberto_seg">
+                                    </label>
+                                    <label for="temp_fecha_seg">
+                                        Fechamento
+                                        <input type="time" name="temp_fecha_seg" id="temp_fecha_seg">
+                                    </label>
+                                </div>
+                                <div>
+                                    <label for="terca">
+                                        <input type="checkbox" name="terca" id="terca" value="Terça-feira">
+                                        Terça-feira
+                                    </label>
+                                    <label for="temp_aberto_ter">
+                                        Abertura
+                                        <input type="time" name="temp_aberto_ter" id="temp_aberto_ter">
+                                    </label>
+                                    <label for="temp_fecha_ter">
+                                        Fechamento
+                                        <input type="time" name="temp_fecha_ter" id="temp_fecha_ter">
+                                    </label>
+                                </div>
+                                <div>
+                                    <label for="quarta">
+                                        <input type="checkbox" name="quarta" id="quarta" value="Quarta-feira">
+                                        Quarta-feira
+                                    </label>
+                                    <label for="temp_aberto_qua">
+                                        Abertura
+                                        <input type="time" name="temp_aberto_qua" id="temp_aberto_qua">
+                                    </label>
+                                    <label for="temp_fecha_qua">
+                                        Fechamento
+                                        <input type="time" name="temp_fecha_qua" id="temp_fecha_qua">
+                                    </label>
+                                </div>
+                                <div>
+                                    <label for="quinta">
+                                        <input type="checkbox" name="quinta" id="quinta" value="Quinta-feira">
+                                        Quinta-feira
+                                    </label>
+                                    <label for="temp_aberto_qui">
+                                        Abertura
+                                        <input type="time" name="temp_aberto_qui" id="temp_aberto_qui">
+                                    </label>
+                                    <label for="temp_fecha_qui">
+                                        Fechamento
+                                        <input type="time" name="temp_fecha_qui" id="temp_fecha_qui">
+                                    </label>
+                                </div>
+                                <div>
+                                    <label for="sexta">
+                                        <input type="checkbox" name="sexta" id="sexta" value="Sexta-feira">
+                                        Sexta-feira
+                                    </label>
+                                    <label for="temp_aberto_sex">
+                                        Abertura
+                                        <input type="time" name="temp_aberto_sex" id="temp_aberto_sex">
+                                    </label>
+                                    <label for="temp_fecha_sex">
+                                        Fechamento
+                                        <input type="time" name="temp_fecha_sex" id="temp_fecha_sex">
+                                    </label>
+                                </div>
+                                <div>
+                                    <label for="sabado">
+                                        <input type="checkbox" name="sabado" id="sabado" value="Sabado">
+                                        Sábado
+                                    </label>
+                                    <label for="temp_aberto_sab">
+                                        Abertura
+                                        <input type="time" name="temp_aberto_sab" id="temp_aberto_sab">
+                                    </label>
+                                    <label for="temp_fecha_sab">
+                                        Fechamento
+                                        <input type="time" name="temp_fecha_sab" id="temp_fecha_sab">
+                                    </label>
+                                </div>
+                                <div>
+                                    <label for="domingo">
+                                        <input type="checkbox" name="domingo" id="domingo" value="Domingo">
+                                        Domingo
+                                    </label>
+                                    <label for="temp_aberto_dom">
+                                        Abertura
+                                        <input type="time" name="temp_aberto_dom" id="temp_aberto_dom">
+                                    </label>
+                                    <label for="temp_fecha_dom">
+                                        Fechamento
+                                        <input type="time" name="temp_fecha_dom" id="temp_fecha_dom">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <input type="submit" class="btn btn-success" value="Adicionar salão">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Modal view feedback-->
+        <div class="modal fade" id="viewFeedback" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">feed</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias, impedit aliquid? Ipsum dicta quod maxime sed rem beatae perspiciatis et in, unde impedit ipsam pariatur consequatur magni cumque dignissimos reiciendis.
+                        Lorem ipsum dolor, sit amet consectetur adipisicing elit. Consequatur repellendus, ipsam, facere odio et neque ad molestiae nemo minus dicta, at animi mollitia eveniet eos dolor
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- block user -->
+        <div class="user-bar">
+            <div class="dados">
+                <img src={{ proprietario.foto_perfil.thumbnail.url }} alt="ola">
+                <h1>{{ user.username }}</h1>
+                <p>(Proprietário)</p>
+            </div>
+            <div class="accordion mt-2" style="padding: 7px;">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseOne" aria-expanded="false" aria-controls="panelsStayOpen-collapseOne">
+                        Salões
+                      </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse">
+                      <div class="accordion-body">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                            Adicionar
+                        </button>
+                      </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
+                      Item #2
+                    </button>
+                  </h2>
+                  <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                      Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nam saepe fugiat, molestiae culpa praesentium pariatur totam qui. Aliquid nulla maiores, iure dolore ipsam veritatis fugiat temporibus cupiditate repellat unde voluptate.
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
+                      Item #3
+                    </button>
+                  </h2>
+                  <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                      Lorem ipsum, dolor sit amet consectetur adipisicing elit. Qui, quasi assumenda dolore facilis sunt perferendis iste reprehenderit suscipit exercitationem soluta. Non incidunt beatae repellat fugit consectetur fugiat dolore perspiciatis ipsam!
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseFor" aria-expanded="false" aria-controls="panelsStayOpen-collapseFor">
+                        Configurações
+                      </button>
+                    </h2>
+                    <div id="panelsStayOpen-collapseFor" class="accordion-collapse collapse">
+                      <div class="accordion-body">
+                        <button type="button" class="btn btn-danger">
+                            Excluir conta
+                        </button>
+                      </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <main>
+            <div>
+                <h1>Meus salões - {{ quantidade }}</h1>
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                        <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                    {% if message.tags == 'warning' %}
+                        <div class="alert alert-warning alert-dismissible fade show text-center" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                    {% if message.tags == 'success' %}
+                        <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                {% if quantidade == 0 %}
+                    <h1>Nenhum salão adicionado</h1>
+                {% else %}
+                    {% for salao in saloes %}
+                        <div class="card mb-3">
+                            <div class="card-body organiza">
+                                <p class="card-text">
+                                    <small class="text-body-secondary">
+                                        <img src="{% static 'imgs/local.png' %}" alt="Localização">
+                                        {{ salao.cidade }}, {{ salao.rua }}, {{ salao.bairro }} - {{ salao.numero }}, ({{ salao.pais }})
+                                    </small>
+                                </p> 
+                                <button type="button" class="btn btn-primary position-relative" style="margin-right: 12px;">
+                                    Agendamentos
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    0
+                                    <span class="visually-hidden">unread messages</span>
+                                    </span>
+                                </button> 
+                            </div>
+                            <img src="{{ salao.salao_image.thumbnail.url }}" class="card-img-top" alt="Salão imagem">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ salao.nome_salao }}</h5>
+                                <p class="card-text">{{ salao.descricao }}</p>
+                                <p class="card-text"><small class="text-body-secondary">Dias de funcionamento</small></p>
+                            </div>
+                            {% if salao.dias_funcionamento.all|length == 0 %}
+                                <ul class="days">
+                                    <li>Nenhum dia de funcionamento</li>
+                                </ul>
+                            {% else %}
+                                <ul class="days">
+                                    {% for dia in salao.dias_funcionamento.all %}
+                                        <li>
+                                            {{ dia.dia_semana }} - Aberto de {{ dia.abertura }} às {{ dia.fechamento }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            <div class="card-body">
+                                <p class="card-text"><small class="text-body-secondary">Serviços disponíveis</small></p>   
+                            </div>
+                            {% if salao.servico.all|length == 0 %}
+                                <ul class="service">
+                                    <li>Nenhum serviço disponível</li>
+                                </ul>
+                            {% else %}
+                                <ul class="service">
+                                    {% for s in salao.servico.all %}
+                                        <li>{{ s.servico }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                            <div class="card-body organiza">
+                                <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewFeedback" style="width: 40em; border: 0px; border-radius: 20px;">
+                                    <div class="feedback">
+                                        <label for="valor">0 Avaliações</label>
+                                        <meter id="valor" min="0" max="100" low="30" high="75" optimum="80" value="0"><meter>
+                                    </div>
+                                </button>
+                                <div>
+                                    <a href="#" class="card-link ">
+                                        <button type="button" class="btn btn-outline-primary">Editar</button>
+                                    </a>
+                                    <a href="{% url 'excluir-salao' salao.id %}" class="card-link">
+                                        <button type="button" class="btn btn-outline-danger">Excluir</button>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </main>
+    {% endif %}
 {% endblock content %}
 
 {% block script %}
-    
+        {% if cliente %}
+
+        {% else %}
+            <script>
+                const addButton = document.getElementById('add-button');
+                const inputContainer = document.getElementById('input-container');
+
+                let inputCount = 0;
+
+                // Adicione um ouvinte de eventos de clique ao botão "mais"
+                addButton.addEventListener('click', (event) => {
+                    // Evite que o evento padrão seja executado
+                    event.preventDefault();
+                    
+                    // Crie uma nova div para o novo conjunto de campos de entrada
+                    const newDiv = document.createElement('div');
+                    
+                    newDiv.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <input type="text" class="form-control" id="input-${inputCount}" name="servicos[]" placeholder="Serviço" style="width: 15em">
+                            <button class="btn btn-danger remove-button"><i class="fas fa-times"></i> Remover serviço</button>
+                        </div>
+                    `;
+
+                    // Adicione um ouvinte de eventos de clique ao botão de remoção
+                    const removeButton = newDiv.querySelector('.remove-button');
+                    removeButton.addEventListener('click', () => {
+                        newDiv.remove();
+                    });
+                    
+                    inputContainer.appendChild(newDiv);
+                    
+                    inputCount++;
+                });
+            </script>
+        {% endif %}
 {% endblock script %}
