@@ -2,12 +2,12 @@
 {% load static %}
 
 {% block css %}
-    {% if cliente %}
+    {% if verificacao %}
         <link rel="stylesheet" href="{% static 'css/principal_cliente.css' %}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     {% else %}
         <link rel="stylesheet" href="{% static 'css/principal_proprietario.css' %}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
     {% endif %}
 {% endblock css %}
 
@@ -17,8 +17,136 @@
 
 {% block content %}
 
-    {% if cliente %}
-        <h1>cliente</h1>
+    {% if verificacao %}
+        <header>
+            <abbr title="Página inicial">
+                <a href="{% url 'inicio' %}">
+                    <img src="https://via.placeholder.com/100x48" alt="logo">
+                </a>
+            </abbr>
+            <div class="dados">
+                <img src={{ cliente.foto_perfil.thumbnail.url }} alt="">
+                <h3>{{ cliente.nome_completo|title }}</h3>
+            </div>
+            <div>
+                <button type="button" class="btn">
+                    <img src="{% static 'imgs/settings.png' %}" alt="Configurações">
+                </button>
+                <a href="{% url 'deslogar' %}">
+                    <button type="button" class="btn btn-danger">Sair</button>
+                </a>
+            </div>
+        </header>
+        {% if quantidade != 0 %}
+            <div class="filtrar">
+                <p>Encontre salões próximos</p>
+                <div class="container">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="col-md-8">
+                            <form action="{% url 'filtrar-salao' %}" method="post" autocomplete="off" id="formfiltro" class="search">
+                                {% csrf_token %}
+                                <i class="fa fa-search"></i>
+                                <input type="search" name="filtro" class="form-control" placeholder="Cidade, país, rua, bairro, ..." required>
+                                <button class="btn btn-primary" type="submit">
+                                    Procurar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <a href="{% url 'principal' %}">
+                    <button type="button" class="btn btn-outline-primary">
+                        Visualizar todos os salões
+                    </button>
+                </a>
+            </div>
+            <div class="text-center">
+                <h4>Total de salões: {{ quantidade }}</h4>
+            </div>
+            <div>
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}
+                        <div class="alert alert-success alert-dismissible fade show text-center" role="alert" style="margin-left: 4em; margin-right: 4em; margin-top: 1em;">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                    {% if message.tags == 'warning' %}
+                        <div class="alert alert-warning alert-dismissible fade show text-center" role="alert" style="margin-left: 4em; margin-right: 4em; margin-top: 1em;">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endif %}
+        <main>
+            {% if quantidade == 0 %}
+                <h1 class="mt-5">Nenhum salão encontrado</h1>
+            {% else %}
+                {% for salao in saloes %}
+                    <div class="card mb-3 w-75" style="box-shadow: 1px 1px 15px 3px rgba(0, 0, 0, 0.371);">
+                        <div class="card-body organiza">
+                            <p class="card-text">
+                                <small class="text-body-secondary">
+                                    <img src="{% static 'imgs/local.png' %}" alt="Localização">
+                                    {{ salao.cidade }}, {{ salao.rua }}, {{ salao.bairro }} - {{ salao.numero }}, ({{ salao.pais }})
+                                </small>
+                            </p>
+                        </div>
+                        <img src="{{ salao.salao_image.thumbnail.url }}" class="card-img-top" alt="Salão imagem">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ salao.nome_salao }}</h5>
+                            <p class="card-text">{{ salao.descricao }}</p>
+                            <p class="card-text"><small class="text-body-secondary">Dias de funcionamento</small></p>
+                        </div>
+                        {% if salao.dias_funcionamento.all|length == 0 %}
+                            <ul class="days">
+                                <li>Nenhum dia de funcionamento</li>
+                            </ul>
+                        {% else %}
+                            <ul class="days">
+                                {% for dia in salao.dias_funcionamento.all %}
+                                    <li>
+                                        {{ dia.dia_semana }} - Aberto de {{ dia.abertura }} às {{ dia.fechamento }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <div class="card-body">
+                            <p class="card-text"><small class="text-body-secondary">Serviços disponíveis</small></p>   
+                        </div>
+                        {% if salao.servico.all|length == 0 %}
+                            <ul class="service">
+                                <li>Nenhum serviço disponível</li>
+                            </ul>
+                        {% else %}
+                            <ul class="service">
+                                {% for s in salao.servico.all %}
+                                    <li>{{ s.servico }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <div class="card-body feedback">
+                            <div>
+                                <label for="valor">0 Avaliações</label>
+                                <meter id="valor" min="0" max="100" low="30" high="75" optimum="80" value="0"><meter>
+                            </div>
+                            <div class="d-flex justify-content-around mt-3">
+                                <p>0 - Gostei</p>
+                                <p>0 - Não gostei</p>
+                                <p>0 - Achei duvidoso</p>
+                            </div>
+                        </div>
+                        <div class="card-body m-auto">
+                            <a href="#">
+                                <button type="button" class="btn btn-primary ">Realizar agendamento</button>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </main>
     {% else %}
         <header>
             <abbr title="Página inicial">
@@ -43,7 +171,12 @@
                         <form action="{% url 'criar-salao' %}" method="post" enctype="multipart/form-data" autocomplete="off">
                             {% csrf_token %}
                             <h3>Características do salão</h3>
-                            {{ form.salao_image }}
+                            <label for="image" class="picture" tabindex="0">
+                                {{ form.salao_image }}
+                                <span class="picture_image" id="imgs">
+                                    Escolher banner (700x200)
+                                </span>
+                            </label>
                             <div class="form-floating mb-2">
                                 {{ form.nome_salao }}
                                 <label for="salon-name">Nome do salão</label>
@@ -364,40 +497,10 @@
 {% endblock content %}
 
 {% block script %}
-        {% if cliente %}
-
+        {% if verificacao %}
+            
         {% else %}
-            <script>
-                const addButton = document.getElementById('add-button');
-                const inputContainer = document.getElementById('input-container');
-
-                let inputCount = 0;
-
-                // Adicione um ouvinte de eventos de clique ao botão "mais"
-                addButton.addEventListener('click', (event) => {
-                    // Evite que o evento padrão seja executado
-                    event.preventDefault();
-                    
-                    // Crie uma nova div para o novo conjunto de campos de entrada
-                    const newDiv = document.createElement('div');
-                    
-                    newDiv.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <input type="text" class="form-control" id="input-${inputCount}" name="servicos[]" placeholder="Serviço" style="width: 15em">
-                            <button class="btn btn-danger remove-button"><i class="fas fa-times"></i> Remover serviço</button>
-                        </div>
-                    `;
-
-                    // Adicione um ouvinte de eventos de clique ao botão de remoção
-                    const removeButton = newDiv.querySelector('.remove-button');
-                    removeButton.addEventListener('click', () => {
-                        newDiv.remove();
-                    });
-                    
-                    inputContainer.appendChild(newDiv);
-                    
-                    inputCount++;
-                });
-            </script>
+            <script src="{% static 'js/page_principal/input_image.js' %}"></script>
+            <script src="{% static 'js/page_principal/add_service.js' %}"></script>
         {% endif %}
 {% endblock script %}

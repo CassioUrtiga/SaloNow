@@ -139,3 +139,10 @@ class FormularioSalao(forms.ModelForm):
         'style': 'width: 6.2em;'
     }))
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['salao_image'].widget.attrs.update({
+            'class': 'picture_image',
+            'id': 'image'
+        })
+        
