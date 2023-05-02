@@ -1,10 +1,12 @@
 from model_mommy import mommy
 from core.views import verificar_formato_email
 from django.urls import reverse
-from django.test import TestCase, Client
+from django.contrib.auth.models import AnonymousUser
+from ..views import login_view
+from django.test import TestCase, Client, RequestFactory
 from django.contrib.auth.models import User
 from core.models import Cliente, Salon, Proprietario, DiasFuncionamento, Servicos
-from core.forms import FormularioSalao
+from core.forms import FormularioCliente, FormularioSalao
 import datetime
 
 class VerificarFormatoEmailTestCase(TestCase):
@@ -171,3 +173,59 @@ class ExcluirSalaoTestCase(TestCase):
         response = self.client.post(self.url)
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Salon.objects.filter(pk=self.salon.pk).exists())
+
+class FiltrarSalaoTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user(username='testuser', password='testpass')
+        self.client.login(username='testuser', password='testpass')
+        self.cliente = mommy.make(Cliente, user=self.user)
+        self.salon1 = mommy.make(Salon, cidade='São Paulo', bairro='Vila Mariana', rua='Rua Vergueiro', numero='100', pais='Brasil')
+        self.salon2 = mommy.make(Salon, cidade='Rio de Janeiro', bairro='Copacabana', rua='Avenida Atlântica', numero='200', pais='Brasil')
+        self.salon3 = mommy.make(Salon, cidade='Belo Horizonte', bairro='Savassi', rua='Rua Pernambuco', numero='300', pais='Brasil')
+
+    def test_filtrar_salao(self):
+        url = reverse('filtrar-salao')
+        data = {'filtro': 'São Paulo, Vergueiro'}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'São Paulo')
+        self.assertContains(response, 'Vila Mariana')
+        self.assertContains(response, 'Rua Vergueiro')
+        self.assertContains(response, '100')
+        self.assertNotContains(response, 'Rio de Janeiro')
+        self.assertNotContains(response, 'Belo Horizonte')
+
+class LoginTestViews(TestCase):
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = User.objects.create_user('carlos', 'carlos@gmail.com', 'carlospass')
+        self.login_url = reverse('login')
+    # Verifica se a página de login pode ser acessada com sucesso
+    def testLogin(self):
+        self.client.login(username='carlos', password='carlospass')
+        response = self.client.get(reverse('login'))
+        self.assertEqual(response.status_code, 200)    
+
+    # Envia uma solicitação POST com usuário e senha inválidos
+    def test_login_view_post_failure(self):
+        response = self.client.post(self.login_url, {'usuario': 'usuario_teste', 'senha': 'senha_incorreta'})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'page_login/login.html')
+
+    def test_login_view_post_invalid_password(self):
+        # cria um usuário com email válido e senha inválida
+        user = User.objects.create_user(username='carlosvini', email='carlos@exemplo.com', password='password')
+
+        # envia solicitação POST com senha incorreta
+        login_data = {'usuario': 'carlos@exemplo.com', 'senha': 'wrongpassword'}
+        response = self.client.post(reverse('login'), data=login_data, follow=True)
+
+        # verifica se a resposta tem status code 200
+        self.assertEqual(response.status_code, 200)
+
+        # verifica se a mensagem de erro é exibida corretamente
+        messages = list(response.context.get('messages'))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Usuário ou senha incorreta')
