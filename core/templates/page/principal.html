@@ -96,36 +96,62 @@
                         </div>
                         <img src="{{ salao.salao_image.thumbnail.url }}" class="card-img-top" alt="Salão imagem">
                         <div class="card-body">
-                            <h5 class="card-title">{{ salao.nome_salao }}</h5>
+                            <h5 class="card-title">{{ salao.nome_salao|title }}</h5>
                             <p class="card-text">{{ salao.descricao }}</p>
                             <p class="card-text"><small class="text-body-secondary">Dias de funcionamento</small></p>
                         </div>
                         {% if salao.dias_funcionamento.all|length == 0 %}
-                            <ul class="days">
-                                <li>Nenhum dia de funcionamento</li>
-                            </ul>
+                            <h5 style="margin-left: 1.5em;">
+                                Nenhum dia de funcionamento
+                            </h5>
                         {% else %}
-                            <ul class="days">
-                                {% for dia in salao.dias_funcionamento.all %}
-                                    <li>
-                                        {{ dia.dia_semana }} - Aberto de {{ dia.abertura }} às {{ dia.fechamento }}
-                                    </li>
-                                {% endfor %}
-                            </ul>
+                            <div style="padding-left: 1.5em; padding-right: 1.5em;">
+                                <table class="table text-center" id="table-view-days">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Dias</th>
+                                            <th scope="col">Abertura</th>
+                                            <th scope="col">Fechamento</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table-group-divider">
+                                        {% for dia in salao.dias_funcionamento.all %}
+                                            <tr>
+                                                <td>{{ dia.dia_semana }}</td>
+                                                <td>{{ dia.abertura }}</td>
+                                                <td>{{ dia.fechamento }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         {% endif %}
                         <div class="card-body">
                             <p class="card-text"><small class="text-body-secondary">Serviços disponíveis</small></p>   
                         </div>
                         {% if salao.servico.all|length == 0 %}
-                            <ul class="service">
-                                <li>Nenhum serviço disponível</li>
-                            </ul>
+                            <h5 style="margin-left: 1.5em;">
+                                Nenhum serviço disponível
+                            </h5>
                         {% else %}
-                            <ul class="service">
-                                {% for s in salao.servico.all %}
-                                    <li>{{ s.servico }}</li>
-                                {% endfor %}
-                            </ul>
+                            <div style="padding-left: 1.5em; padding-right: 1.5em;">
+                                <table class="table text-center" id="table-view-services">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Serviço</th>
+                                            <th scope="col">Preço</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table-group-divider">
+                                        {% for s in salao.servico.all %}
+                                            <tr>
+                                                <td>{{ s.servico|title }}</td>
+                                                <td>R$ {{ s.preco }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         {% endif %}
                         <div class="card-body feedback">
                             <div>
@@ -162,13 +188,13 @@
         <!-- Modal add salon -->
         <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content">
+                <div class="modal-content" id="modalsalon">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Acidionar salão</h1>
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel"></h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form action="{% url 'criar-salao' %}" method="post" enctype="multipart/form-data" autocomplete="off">
+                        <form method="post" enctype="multipart/form-data" autocomplete="off">
                             {% csrf_token %}
                             <h3>Características do salão</h3>
                             <label for="image" class="picture" tabindex="0">
@@ -177,6 +203,11 @@
                                     Escolher banner (700x200)
                                 </span>
                             </label>
+                            <div class="edit-image d-flex justify-content-center mb-2 mt-2">
+                                <button type="button" class="btn btn-danger" onclick="
+                                    document.getElementById('imgs').innerHTML='Escolher banner (700x200)'
+                                ">Remover imagem</button>
+                            </div>
                             <div class="form-floating mb-2">
                                 {{ form.nome_salao }}
                                 <label for="salon-name">Nome do salão</label>
@@ -184,134 +215,147 @@
                             <div class="mb-2">
                                 {{ form.descricao }}
                             </div>
-                            <h3>Localidade</h3>
-                            <div class="form-floating mb-2">
-                                {{ form.cidade }}
-                                <label for="city">Cidade</label>
-                            </div>
-                            <div class="form-floating mb-2">
-                                {{ form.pais }}
-                                <label for="pais">País</label>
-                            </div>
-                            <div class="form-floating mb-2">
-                                {{ form.rua }}
-                                <label for="rua">Rua</label>
-                            </div>
-                            <div class="form-floating mb-2">
-                                {{ form.bairro }}
-                                <label for="bairro">Bairro</label>
-                            </div>
-                            <div class="mb-2">
-                                {{ form.numero }}
+                            <div class="location-inputs">
+                                <h3>Localidade</h3>
+                                <div class="form-floating mb-2">
+                                    {{ form.cidade }}
+                                    <label for="city">Cidade</label>
+                                </div>
+                                <div class="form-floating mb-2">
+                                    {{ form.pais }}
+                                    <label for="pais">País</label>
+                                </div>
+                                <div class="form-floating mb-2">
+                                    {{ form.rua }}
+                                    <label for="rua">Rua</label>
+                                </div>
+                                <div class="form-floating mb-2">
+                                    {{ form.bairro }}
+                                    <label for="bairro">Bairro</label>
+                                </div>
+                                <div class="mb-2">
+                                    {{ form.numero }}
+                                </div>
                             </div>   
                             <h3>Serviços disponíveis</h3>
                             <div>
                                 <button id="add-button" class="btn btn-primary mb-3"><i class="fas fa-plus"></i> Adicionar serviço</button>
-                                <div id="input-container"></div>
+                                <table id="input-container"></table>
                             </div>
-                            <h3>Dias de funcionamento</h3>
                             <div>
-                                <div>
-                                    <label for="segunda">
-                                        <input type="checkbox" name="segunda" id="segunda" value="Segunda-feira">
-                                        Segunda-feira
-                                    </label>
-                                    <label for="temp_aberto_seg">
-                                        Abertura
-                                        <input type="time" name="temp_aberto_seg" id="temp_aberto_seg">
-                                    </label>
-                                    <label for="temp_fecha_seg">
-                                        Fechamento
-                                        <input type="time" name="temp_fecha_seg" id="temp_fecha_seg">
-                                    </label>
-                                </div>
-                                <div>
-                                    <label for="terca">
-                                        <input type="checkbox" name="terca" id="terca" value="Terça-feira">
-                                        Terça-feira
-                                    </label>
-                                    <label for="temp_aberto_ter">
-                                        Abertura
-                                        <input type="time" name="temp_aberto_ter" id="temp_aberto_ter">
-                                    </label>
-                                    <label for="temp_fecha_ter">
-                                        Fechamento
-                                        <input type="time" name="temp_fecha_ter" id="temp_fecha_ter">
-                                    </label>
-                                </div>
-                                <div>
-                                    <label for="quarta">
-                                        <input type="checkbox" name="quarta" id="quarta" value="Quarta-feira">
-                                        Quarta-feira
-                                    </label>
-                                    <label for="temp_aberto_qua">
-                                        Abertura
-                                        <input type="time" name="temp_aberto_qua" id="temp_aberto_qua">
-                                    </label>
-                                    <label for="temp_fecha_qua">
-                                        Fechamento
-                                        <input type="time" name="temp_fecha_qua" id="temp_fecha_qua">
-                                    </label>
-                                </div>
-                                <div>
-                                    <label for="quinta">
-                                        <input type="checkbox" name="quinta" id="quinta" value="Quinta-feira">
-                                        Quinta-feira
-                                    </label>
-                                    <label for="temp_aberto_qui">
-                                        Abertura
-                                        <input type="time" name="temp_aberto_qui" id="temp_aberto_qui">
-                                    </label>
-                                    <label for="temp_fecha_qui">
-                                        Fechamento
-                                        <input type="time" name="temp_fecha_qui" id="temp_fecha_qui">
-                                    </label>
-                                </div>
-                                <div>
-                                    <label for="sexta">
-                                        <input type="checkbox" name="sexta" id="sexta" value="Sexta-feira">
-                                        Sexta-feira
-                                    </label>
-                                    <label for="temp_aberto_sex">
-                                        Abertura
-                                        <input type="time" name="temp_aberto_sex" id="temp_aberto_sex">
-                                    </label>
-                                    <label for="temp_fecha_sex">
-                                        Fechamento
-                                        <input type="time" name="temp_fecha_sex" id="temp_fecha_sex">
-                                    </label>
-                                </div>
-                                <div>
-                                    <label for="sabado">
-                                        <input type="checkbox" name="sabado" id="sabado" value="Sabado">
-                                        Sábado
-                                    </label>
-                                    <label for="temp_aberto_sab">
-                                        Abertura
-                                        <input type="time" name="temp_aberto_sab" id="temp_aberto_sab">
-                                    </label>
-                                    <label for="temp_fecha_sab">
-                                        Fechamento
-                                        <input type="time" name="temp_fecha_sab" id="temp_fecha_sab">
-                                    </label>
-                                </div>
-                                <div>
-                                    <label for="domingo">
-                                        <input type="checkbox" name="domingo" id="domingo" value="Domingo">
-                                        Domingo
-                                    </label>
-                                    <label for="temp_aberto_dom">
-                                        Abertura
-                                        <input type="time" name="temp_aberto_dom" id="temp_aberto_dom">
-                                    </label>
-                                    <label for="temp_fecha_dom">
-                                        Fechamento
-                                        <input type="time" name="temp_fecha_dom" id="temp_fecha_dom">
-                                    </label>
-                                </div>
+                                <h3>Dias de funcionamento</h3>
+                                <table class="table" id="days-selector">
+                                    <thead>
+                                      <tr>
+                                        <th scope="col">Dias</th>
+                                        <th scope="col">Abertura</th>
+                                        <th scope="col">Fechamento</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody class="table-group-divider">
+                                        <tr>
+                                            <td>
+                                                <label for="segunda">
+                                                    <input type="checkbox" name="segunda" id="segunda" value="Segunda-feira">
+                                                    Segunda-feira
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_aberto_seg" id="temp_aberto_seg" disabled>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_fecha_seg" id="temp_fecha_seg" disabled>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="terca">
+                                                    <input type="checkbox" name="terca" id="terca" value="Terça-feira">
+                                                    Terça-feira
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_aberto_ter" id="temp_aberto_ter" disabled>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_fecha_ter" id="temp_fecha_ter" disabled>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="quarta">
+                                                    <input type="checkbox" name="quarta" id="quarta" value="Quarta-feira">
+                                                    Quarta-feira
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_aberto_qua" id="temp_aberto_qua" disabled>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_fecha_qua" id="temp_fecha_qua" disabled>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="quinta">
+                                                    <input type="checkbox" name="quinta" id="quinta" value="Quinta-feira">
+                                                    Quinta-feira
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_aberto_qui" id="temp_aberto_qui" disabled>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_fecha_qui" id="temp_fecha_qui" disabled>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="sexta">
+                                                    <input type="checkbox" name="sexta" id="sexta" value="Sexta-feira">
+                                                    Sexta-feira
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_aberto_sex" id="temp_aberto_sex" disabled>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_fecha_sex" id="temp_fecha_sex" disabled>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="sabado">
+                                                    <input type="checkbox" name="sabado" id="sabado" value="Sabado">
+                                                    Sábado
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_aberto_sab" id="temp_aberto_sab" disabled>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_fecha_sab" id="temp_fecha_sab" disabled>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label for="domingo">
+                                                    <input type="checkbox" name="domingo" id="domingo" value="Domingo">
+                                                    Domingo
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_aberto_dom" id="temp_aberto_dom" disabled>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="temp_fecha_dom" id="temp_fecha_dom" disabled>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                             <div class="modal-footer">
-                                <input type="submit" class="btn btn-success" value="Adicionar salão">
+                                <input type="submit" class="btn btn-success" value="">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                             </div>
                         </form>
@@ -338,7 +382,7 @@
         <div class="user-bar">
             <div class="dados">
                 <img src={{ proprietario.foto_perfil.thumbnail.url }} alt="ola">
-                <h1>{{ user.username }}</h1>
+                <h1>{{ user.username|title }}</h1>
                 <p>(Proprietário)</p>
             </div>
             <div class="accordion mt-2" style="padding: 7px;">
@@ -350,7 +394,7 @@
                     </h2>
                     <div id="panelsStayOpen-collapseOne" class="accordion-collapse collapse">
                       <div class="accordion-body">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" id="addsalon">
                             Adicionar
                         </button>
                       </div>
@@ -359,7 +403,7 @@
                 <div class="accordion-item">
                   <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
-                      Item #2
+                      Agendamentos
                     </button>
                   </h2>
                   <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
@@ -371,7 +415,7 @@
                 <div class="accordion-item">
                   <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseThree" aria-expanded="false" aria-controls="panelsStayOpen-collapseThree">
-                      Item #3
+                      Relatórios
                     </button>
                   </h2>
                   <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse">
@@ -423,12 +467,12 @@
                     <h1>Nenhum salão adicionado</h1>
                 {% else %}
                     {% for salao in saloes %}
-                        <div class="card mb-3">
-                            <div class="card-body organiza">
+                        <div class="card mb-3" id={{ salao.id }}>
+                            <div class="card-body organiza div1">
                                 <p class="card-text">
                                     <small class="text-body-secondary">
                                         <img src="{% static 'imgs/local.png' %}" alt="Localização">
-                                        {{ salao.cidade }}, {{ salao.rua }}, {{ salao.bairro }} - {{ salao.numero }}, ({{ salao.pais }})
+                                        {{ salao.cidade|title }}, {{ salao.rua|title }}, {{ salao.bairro|title }} - {{ salao.numero }}, ( {{ salao.pais|title }} )
                                     </small>
                                 </p> 
                                 <button type="button" class="btn btn-primary position-relative" style="margin-right: 12px;">
@@ -440,37 +484,63 @@
                                 </button> 
                             </div>
                             <img src="{{ salao.salao_image.thumbnail.url }}" class="card-img-top" alt="Salão imagem">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ salao.nome_salao }}</h5>
+                            <div class="card-body div2">
+                                <h3 class="card-title">{{ salao.nome_salao|title }}</h3>
                                 <p class="card-text">{{ salao.descricao }}</p>
-                                <p class="card-text"><small class="text-body-secondary">Dias de funcionamento</small></p>
+                                <p class="card-text"><small class="text-body-secondary">Dias de funcionamento ( {{ salao.dias_funcionamento.all|length }} )</small></p>
                             </div>
                             {% if salao.dias_funcionamento.all|length == 0 %}
-                                <ul class="days">
-                                    <li>Nenhum dia de funcionamento</li>
-                                </ul>
+                                <h5 style="margin-left: 1.5em;">
+                                    Nenhum dia de funcionamento
+                                </h5>
                             {% else %}
-                                <ul class="days">
-                                    {% for dia in salao.dias_funcionamento.all %}
-                                        <li>
-                                            {{ dia.dia_semana }} - Aberto de {{ dia.abertura }} às {{ dia.fechamento }}
-                                        </li>
-                                    {% endfor %}
-                                </ul>
+                                <div style="padding-left: 1.5em; padding-right: 1.5em;">
+                                    <table class="table text-center" id="table-view-days">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Dias</th>
+                                                <th scope="col">Abertura</th>
+                                                <th scope="col">Fechamento</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="table-group-divider">
+                                            {% for dia in salao.dias_funcionamento.all %}
+                                                <tr>
+                                                    <td>{{ dia.dia_semana }}</td>
+                                                    <td>{{ dia.abertura }}</td>
+                                                    <td>{{ dia.fechamento }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                             {% endif %}
                             <div class="card-body">
-                                <p class="card-text"><small class="text-body-secondary">Serviços disponíveis</small></p>   
+                                <p class="card-text"><small class="text-body-secondary">Serviços disponíveis ( {{ salao.servico.all|length }} )</small></p>   
                             </div>
                             {% if salao.servico.all|length == 0 %}
-                                <ul class="service">
-                                    <li>Nenhum serviço disponível</li>
-                                </ul>
+                                <h5 style="margin-left: 1.5em;">
+                                    Nenhum serviço disponível
+                                </h5>
                             {% else %}
-                                <ul class="service">
-                                    {% for s in salao.servico.all %}
-                                        <li>{{ s.servico }}</li>
-                                    {% endfor %}
-                                </ul>
+                                <div style="padding-left: 1.5em; padding-right: 1.5em;">
+                                    <table class="table text-center" id="table-view-services">
+                                        <thead>
+                                            <tr>
+                                              <th scope="col">Serviço</th>
+                                              <th scope="col">Preço</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="table-group-divider">
+                                            {% for s in salao.servico.all %}
+                                                <tr>
+                                                    <td>{{ s.servico|title }}</td>
+                                                    <td>R$ {{ s.preco }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                             {% endif %}
                             <div class="card-body organiza">
                                 <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewFeedback" style="width: 40em; border: 0px; border-radius: 20px;">
@@ -480,8 +550,11 @@
                                     </div>
                                 </button>
                                 <div>
-                                    <a href="#" class="card-link ">
-                                        <button type="button" class="btn btn-outline-primary">Editar</button>
+                                    <a href="#">
+                                        <button type="button" class="btn btn-outline-secondary">Relatório</button>
+                                    </a>
+                                    <a href="#" class="card-link">
+                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" onclick="editarSalao(event)">Editar</button>
                                     </a>
                                     <a href="{% url 'excluir-salao' salao.id %}" class="card-link">
                                         <button type="button" class="btn btn-outline-danger">Excluir</button>
@@ -502,5 +575,6 @@
         {% else %}
             <script src="{% static 'js/page_principal/input_image.js' %}"></script>
             <script src="{% static 'js/page_principal/add_service.js' %}"></script>
+            <script src="{% static 'js/page_principal/add_edit_salon.js' %}"></script>
         {% endif %}
 {% endblock script %}

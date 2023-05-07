@@ -1,5 +1,6 @@
 let inputFile = document.getElementById('image')
 let pictureImage = document.getElementById('imgs')
+let btnEditImage = document.querySelector('.edit-image')
 
 inputFile.addEventListener('change', function(e){
     let inputTarget = e.target
@@ -16,9 +17,9 @@ inputFile.addEventListener('change', function(e){
             pictureImage.innerHTML = ''
             pictureImage.appendChild(img)
         })
-
+        
         reader.readAsDataURL(file)
     }else{
-        console.log('no')
+        console.log('ERRO AO CARREGAR IMAGEM')
     }
 })

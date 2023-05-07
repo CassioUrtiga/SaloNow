@@ -177,9 +177,11 @@ def criar_salao(request):
             salao.dias_funcionamento.add(dia)
         
         # Obter os valores dos inputs serviços
-        inputs = request.POST.getlist('servicos[]')
-        for obj in inputs:
-            salao.servico.add(Servicos.objects.create(servico=obj))
+        input_servicos = request.POST.getlist('servicos[]')
+        input_precos = request.POST.getlist('precos[]')
+
+        for i, obj in enumerate(input_servicos):
+            salao.servico.add(Servicos.objects.create(servico=obj, preco=input_precos[i]))
         
         salao.save()
         messages.success(request, f'Salão {salao.nome_salao.upper()} cadastrado com sucesso')
@@ -192,7 +194,7 @@ def excluirSalao(request, id):
     if not request.user.is_authenticated:
         return redirect('login')
     
-    salao = get_object_or_404(Salon, pk=id)
+    salao = get_object_or_404(Salon, proprietario=Proprietario.objects.get(user_id=request.user.id), pk=id)
     messages.error(request, f'Salão {salao.nome_salao.upper()} foi exluído')
     salao.delete()
     return redirect('principal')
@@ -229,6 +231,55 @@ def filtrar_salao(request):
     
     messages.success(request, f'Foram encontrados {context["quantidade"]} resultados para a busca')
     return render(request, 'page/principal.html', context)
+
+def editar_salao(request, id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    salao = get_object_or_404(Salon, proprietario=Proprietario.objects.get(user_id=request.user.id), pk=id)
+
+    form = FormularioSalao(request.POST, request.FILES)
+    if form.is_valid():
+        dados = []
+
+        # Obter os valores das caixas de seleção
+        dias_selecionados = request.POST.getlist('segunda') + request.POST.getlist('terca') + request.POST.getlist('quarta') + request.POST.getlist('quinta') + request.POST.getlist('sexta') + request.POST.getlist('sabado') + request.POST.getlist('domingo')
+
+
+        # Obter as horas de abertura e fechamento para o dia atual
+        for dia in dias_selecionados:
+            abertura = request.POST.get(f'temp_aberto_{dia[:3].lower()}')
+            fechamento = request.POST.get(f'temp_fecha_{dia[:3].lower()}')
+            dados.append([dia, abertura, fechamento])
+        
+        #salao_image=form.cleaned_data['salao_image']
+        salao.nome_salao = form.cleaned_data['nome_salao']
+        salao.descricao = form.cleaned_data['descricao']
+        salao.cidade = form.cleaned_data['cidade']
+        salao.rua = form.cleaned_data['rua']
+        salao.pais = form.cleaned_data['pais']
+        salao.bairro = form.cleaned_data['bairro']
+        salao.numero = form.cleaned_data['numero']
+        
+        salao.dias_funcionamento.clear()
+        for obj in dados:
+            dia = DiasFuncionamento.objects.create(dia_semana=obj[0],abertura=obj[1] if obj[1] else '00:00:00', fechamento=obj[2] if obj[2] else '00:00:00')
+            salao.dias_funcionamento.add(dia)
+        
+        # Obter os valores dos inputs serviços
+        salao.servico.clear()
+        input_servicos = request.POST.getlist('servicos[]')
+        input_precos = request.POST.getlist('precos[]')
+        
+        for i, obj in enumerate(input_servicos):
+            salao.servico.add(Servicos.objects.create(servico=obj, preco=input_precos[i]))
+        
+        salao.save()
+        messages.success(request, f'Salão {salao.nome_salao.upper()} foi alterado com sucesso')
+        return redirect('principal')
+    else:
+        messages.warning(request, 'Formulário inválido')
+        return redirect('principal')
 
 def aguardar(request):
     return render(request, 'page/aguarde.html')

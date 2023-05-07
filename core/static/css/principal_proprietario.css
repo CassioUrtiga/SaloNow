@@ -68,23 +68,6 @@ main{
     color: #DAFDBA;
 }
 
-.service{
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.days{
-    list-style: none;
-}
-
-.service > li{
-    border: 1px solid green;
-    border-radius: 20px;
-    padding: 6px 8px;
-    margin-right: 10px;
-}
-
 .feedback{
     display: flex;
     justify-content: center;
@@ -112,4 +95,8 @@ button > div > label{
 
 .organiza a{
     text-decoration: none;
+}
+
+.card-link + .card-link{
+    margin-left: 0;
 }
