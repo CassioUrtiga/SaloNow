@@ -25,7 +25,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        
+    
+    - name: Check if .coveragerc exists
+      run: |
+        if [ ! -f "$GITHUB_WORKSPACE/.coveragerc" ]; then cp .coveragerc $GITHUB_WORKSPACE; fi
+
     - name: Copy .coveragerc
       run: cp .coveragerc $GITHUB_WORKSPACE
 
