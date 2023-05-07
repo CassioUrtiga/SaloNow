@@ -1,10 +1,12 @@
 asgiref==3.6.0
 certifi==2022.12.7
 charset-normalizer==3.1.0
+coverage==7.2.5
 dj-static==0.0.6
 Django==4.1.7
 django-stdimage==6.0.1
 idna==3.4
+model-mommy==2.0.0
 Pillow==9.5.0
 psycopg2-binary==2.9.5
 python-decouple==3.8
