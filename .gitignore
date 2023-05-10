@@ -1,7 +1,5 @@
 venv/
 
-db_config.json
-
 __pycache__
 
 *.*~
@@ -11,5 +9,7 @@ __pycache__
 .idea
 
 .env
+
+.coverage
 
 htmlcov/*
