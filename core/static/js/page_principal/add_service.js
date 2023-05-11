@@ -1,30 +1,42 @@
 const addButton = document.getElementById('add-button');
 const inputContainer = document.getElementById('input-container');
 
-let inputCount = 0;
-
-// Adicione um ouvinte de eventos de clique ao botão "mais"
 addButton.addEventListener('click', (event) => {
     // Evite que o evento padrão seja executado
-    event.preventDefault();
+    event.preventDefault()
     
-    // Crie uma nova div para o novo conjunto de campos de entrada
-    const newDiv = document.createElement('div');
+    // Crie uma nova linha para o novo conjunto de campos de entrada
+    const newRow = document.createElement('tr')
     
-    newDiv.innerHTML = `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-            <input type="text" class="form-control" id="input-${inputCount}" name="servicos[]" placeholder="Serviço" style="width: 15em">
-            <button class="btn btn-danger remove-button"><i class="fas fa-times"></i> Remover serviço</button>
-        </div>
+    newRow.innerHTML = `
+        <tr>
+            <td>
+                <input type="text" class="form-control" name="servicos[]" placeholder="Serviço" oninput="event_input_void(event)" />
+            </td>
+            <td>
+                <input type="number" class="form-control" step="0.01" name="precos[]" placeholder="Preço" required disabled />
+            </td>
+            <td>
+                <button class="btn btn-danger remove-button"><i class="fas fa-times"></i> Remover serviço</button>
+            </td>
+        </tr>
     `;
 
-    // Adicione um ouvinte de eventos de clique ao botão de remoção
-    const removeButton = newDiv.querySelector('.remove-button');
+    const removeButton = newRow.querySelector('.remove-button')
     removeButton.addEventListener('click', () => {
-        newDiv.remove();
+        newRow.remove()
     });
     
-    inputContainer.appendChild(newDiv);
-    
-    inputCount++;
+    inputContainer.appendChild(newRow)
 });
+
+function event_input_void(event){
+    let inputPreco = event.target.parentElement.nextElementSibling.querySelector('input[type=number]');
+
+    if (event.target.value.trim() === '') {
+        inputPreco.disabled = true
+        inputPreco.value = ''
+    } else {
+        inputPreco.disabled = false
+    }
+}

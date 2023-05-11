@@ -62,6 +62,7 @@ class DiasFuncionamento(models.Model):
 
 class Servicos(models.Model):
     servico = models.CharField(max_length=50)
+    preco = models.FloatField(default=0.00)
 
 class Salon(models.Model):
     proprietario = models.ForeignKey(Proprietario, on_delete=models.CASCADE)

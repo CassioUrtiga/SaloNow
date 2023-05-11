@@ -44,23 +44,6 @@ main > div > h1{
     align-items: center;
 }
 
-.service{
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.days{
-    list-style: none;
-}
-
-.service > li{
-    border: 1px solid green;
-    border-radius: 20px;
-    padding: 6px 8px;
-    margin-right: 10px;
-}
-
 .feedback{
     margin: auto;
 }
