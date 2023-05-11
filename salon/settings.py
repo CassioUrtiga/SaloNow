@@ -1,15 +1,10 @@
 from pathlib import Path
 from decouple import config
 import os
-import json
 
-# Abre o arquivo de configurações do banco de dados
-with open('./db_config.json', 'r') as config_file:
-    db_config = json.load(config_file)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -22,9 +17,7 @@ DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -72,11 +65,11 @@ WSGI_APPLICATION = 'salon.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': db_config['NAME'],
-        'USER': db_config['USER'],
-        'PASSWORD': db_config['PASSWORD'],
-        'HOST': db_config['HOST'],
-        'PORT': db_config['PORT'],
+        'NAME': config('NAME'),
+        'USER': config('USER'),
+        'PASSWORD': config('PASSWORD'),
+        'HOST': config('HOST'),
+        'PORT': config('PORT'),
     }
 }
 

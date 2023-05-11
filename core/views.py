@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from .forms import FormularioCliente, FormularioProprietario, FormularioSalao
 from .models import Cliente, Proprietario, Salon, DiasFuncionamento, Servicos
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
+from functools import reduce
 
 
 # Views
@@ -38,7 +40,6 @@ def login_view(request):
                 return render(request, 'page_login/login.html')
     else:
         return render(request, 'page_login/login.html')
-
 
 def logout_view(request):
     if not request.user.is_authenticated:
@@ -124,82 +125,111 @@ def tela_principal(request):
     verifica = True
     if not request.user.is_authenticated:
         return redirect('login')
-    else:
-        # verifica se o user logado é cliente ou não
-        if Cliente.objects.filter(user=request.user).exists():
-            print('cliente')
-        else:
-            verifica = False
-    if verifica:
-        context = {}
-    else:
+    
+    #verifica = true (cliente) / false (proprietario)
+    verifica = Cliente.objects.filter(user=request.user.id).exists()
+
+    if not verifica:
         prop = Proprietario.objects.get(user_id=request.user.id)
 
-        context = {
-            'cliente': verifica,
-            'form': FormularioSalao(),
-            'quantidade': Salon.objects.filter(proprietario_id=prop.id).count(),
-            'saloes': Salon.objects.filter(proprietario_id=prop.id),
-            'proprietario': prop,
-        }
+    context = {
+        'verificacao': verifica,
+        'cliente': Cliente.objects.get(user_id=request.user.id) if verifica else None,
+        'proprietario': prop if not verifica else None,
+        'form': FormularioSalao() if not verifica else None,
+        'saloes': Salon.objects.all() if verifica else Salon.objects.filter(proprietario_id=prop.id),
+        'quantidade': Salon.objects.all().count() if verifica else Salon.objects.filter(proprietario_id=prop.id).count()
+    }
 
     return render(request, 'page/principal.html', context)
 
 def criar_salao(request):
     if not request.user.is_authenticated:
         return redirect('login')
+    
+    form = FormularioSalao(request.POST, request.FILES)
+    if form.is_valid():
+        dados = []
+
+        # Obter os valores das caixas de seleção
+        dias_selecionados = request.POST.getlist('segunda') + request.POST.getlist('terca') + request.POST.getlist('quarta') + request.POST.getlist('quinta') + request.POST.getlist('sexta') + request.POST.getlist('sabado') + request.POST.getlist('domingo')
+
+
+        # Obter as horas de abertura e fechamento para o dia atual
+        for dia in dias_selecionados:
+            abertura = request.POST.get(f'temp_aberto_{dia[:3].lower()}')
+            fechamento = request.POST.get(f'temp_fecha_{dia[:3].lower()}')
+            dados.append([dia, abertura, fechamento])
+        
+        salao = Salon.objects.create(
+            proprietario=Proprietario.objects.get(user_id=request.user.id),
+            nome_salao=form.cleaned_data['nome_salao'],
+            descricao=form.cleaned_data['descricao'],
+            salao_image=form.cleaned_data['salao_image'],
+            cidade=form.cleaned_data['cidade'],
+            rua=form.cleaned_data['rua'],
+            pais=form.cleaned_data['pais'],
+            bairro=form.cleaned_data['bairro'],
+            numero=form.cleaned_data['numero']
+        )
+        
+        for obj in dados:
+            dia = DiasFuncionamento.objects.create(dia_semana=obj[0],abertura=obj[1] if obj[1] else '00:00:00', fechamento=obj[2] if obj[2] else '00:00:00')
+            salao.dias_funcionamento.add(dia)
+        
+        # Obter os valores dos inputs serviços
+        inputs = request.POST.getlist('servicos[]')
+        for obj in inputs:
+            salao.servico.add(Servicos.objects.create(servico=obj))
+        
+        salao.save()
+        messages.success(request, f'Salão {salao.nome_salao.upper()} cadastrado com sucesso')
+        return redirect('principal')
     else:
-        form = FormularioSalao(request.POST, request.FILES)
-        if form.is_valid():
-            dados = []
-
-            # Obter os valores das caixas de seleção
-            dias_selecionados = request.POST.getlist('segunda') + request.POST.getlist('terca') + request.POST.getlist('quarta') + request.POST.getlist('quinta') + request.POST.getlist('sexta') + request.POST.getlist('sabado') + request.POST.getlist('domingo')
-
-
-            # Obter as horas de abertura e fechamento para o dia atual
-            for dia in dias_selecionados:
-                abertura = request.POST.get(f'temp_aberto_{dia[:3].lower()}')
-                fechamento = request.POST.get(f'temp_fecha_{dia[:3].lower()}')
-                dados.append([dia, abertura, fechamento])
-            
-            salao = Salon.objects.create(
-                proprietario=Proprietario.objects.get(user_id=request.user.id),
-                nome_salao=form.cleaned_data['nome_salao'],
-                descricao=form.cleaned_data['descricao'],
-                salao_image=form.cleaned_data['salao_image'],
-                cidade=form.cleaned_data['cidade'],
-                rua=form.cleaned_data['rua'],
-                pais=form.cleaned_data['pais'],
-                bairro=form.cleaned_data['bairro'],
-                numero=form.cleaned_data['numero']
-            )
-            
-            for obj in dados:
-                dia = DiasFuncionamento.objects.create(dia_semana=obj[0],abertura=obj[1] if obj[1] else '00:00:00', fechamento=obj[2] if obj[2] else '00:00:00')
-                salao.dias_funcionamento.add(dia)
-            
-            # Obter os valores dos inputs serviços
-            inputs = request.POST.getlist('servicos[]')
-            for obj in inputs:
-                salao.servico.add(Servicos.objects.create(servico=obj))
-            
-            salao.save()
-            messages.success(request, f'Salão {salao.nome_salao.upper()} cadastrado com sucesso')
-            return redirect('principal')
-        else:
-            messages.warning(request, 'Formulário inválido')
-            return redirect('principal')
+        messages.warning(request, 'Formulário inválido')
+        return redirect('principal')
 
 def excluirSalao(request, id):
     if not request.user.is_authenticated:
         return redirect('login')
-    else:
-        salao = get_object_or_404(Salon, pk=id)
-        messages.error(request, f'Salão {salao.nome_salao.upper()} foi exluído')
-        salao.delete()
+    
+    salao = get_object_or_404(Salon, pk=id)
+    messages.error(request, f'Salão {salao.nome_salao.upper()} foi exluído')
+    salao.delete()
+    return redirect('principal')
+
+def filtrar_salao(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    filtro = str(request.POST.get('filtro')).split(',')
+    filtro = [s.strip() for s in filtro]
+
+    condicoes = [
+        Q(cidade__icontains=termo) | 
+        Q(bairro__icontains=termo) | 
+        Q(rua__icontains=termo) | 
+        Q(numero__icontains=termo) |
+        Q(pais__icontains=termo)
+        for termo in filtro
+    ]
+
+    saloes = Salon.objects.filter(reduce(lambda x, y: x | y, condicoes))
+
+    context = {
+        'verificacao': True,
+        'cliente': Cliente.objects.get(user_id=request.user.id),
+        'saloes': saloes,
+        'quantidade': saloes.count(),
+    }
+
+    if context["quantidade"] == 0:
+        messages.warning(request, 'Nenhum resultado para a busca')
         return redirect('principal')
 
+    
+    messages.success(request, f'Foram encontrados {context["quantidade"]} resultados para a busca')
+    return render(request, 'page/principal.html', context)
 
 def aguardar(request):
     return render(request, 'page/aguarde.html')

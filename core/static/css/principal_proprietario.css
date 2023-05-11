@@ -16,6 +16,27 @@ header{
     color: #DAFDBA;
 }
 
+#image{
+    display: none;
+}
+
+.picture{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 450px;
+    aspect-ratio: 16/9;
+    background-color: #ddd;
+    color: #aaa;
+    border: 2px dashed #aaa;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.img_input{
+    max-width: 100%;
+}
+
 .user-bar{
     grid-area: bar;
     width: 20em;
