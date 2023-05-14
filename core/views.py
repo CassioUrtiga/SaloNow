@@ -56,13 +56,29 @@ def cadastrar_cliente(request):
             email = form_cliente.data['email']
             senha = form_cliente.data['senha']
 
+            dados_cep = None
+            try:
+                cep = requests.get(f"https://viacep.com.br/ws/{form_cliente.data['cep'].replace('-','')}/json/")
+                
+                dados_cep = cep.json()
+                if cep.status_code != 200 or dados_cep.get('erro', False):
+                    messages.error(request, 'CEP inválido')
+                    return render(request, 'page_login/cadastro_cliente.html', {'form': form_cliente})
+            except:
+                messages.error(request, 'CEP inválido')
+                return render(request, 'page_login/cadastro_cliente.html', {'form': form_cliente})
+
+
             if User.objects.filter(username=username).exists():
                 messages.warning(request, f'Usuário {username} já existe!')
                 return render(request, 'page_login/cadastro_cliente.html', {'form': form_cliente})
             else:
                 user = User.objects.create_user(username, email, senha)
                 cliente = form_cliente.save(commit=False)
+
                 cliente.user = user
+                cliente.cidade = dados_cep['localidade']
+                cliente.uf = dados_cep['uf']
 
                 user.save()
                 cliente.save()
@@ -70,6 +86,7 @@ def cadastrar_cliente(request):
                 messages.success(request, 'Cadastro realizado com sucesso!')
                 return redirect('login') 
         else:
+            print(form_cliente.errors)
             if (verificar_formato_email(form_cliente.data['email'])):
                 messages.error(request, 'Formulário inválido!')
                 return render(request, 'page_login/cadastro_cliente.html', {'form': FormularioCliente()})
@@ -281,6 +298,34 @@ def editar_salao(request, id):
     else:
         messages.warning(request, 'Formulário inválido')
         return redirect('principal')
+
+def atualizar_cep_cliente(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    item1 = request.POST.get('validation_message1')
+    item2 = request.POST.get('validation_message2')
+
+    local = ''
+
+    if item1:
+        local = item1
+    elif item2:
+        local = item2
+
+    if not local:
+        return redirect('principal')
+    
+    local_array = str(local).split(',')
+    cliente = Cliente.objects.get(user_id=request.user.id)
+
+    cliente.cep = local_array[0]
+    cliente.cidade = local_array[1]
+    cliente.uf = local_array[2]
+
+    cliente.save()
+
+    return redirect('principal')
 
 def aguardar(request):
     return render(request, 'page/aguarde.html')

@@ -17,6 +17,9 @@ def get_file_path_salon(instance, filename):
 class Cliente(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nome_completo = models.CharField(max_length=100, null=False)
+    cep = models.CharField(max_length=9, null=False, default='00000-000')
+    cidade = models.CharField(max_length=30, default='Cidade')
+    uf = models.CharField(max_length=2, default='uf')
     foto_perfil = StdImageField('foto_perfil', upload_to=get_file_path_profile, variations={'thumbnail': (60, 60, True)}, default='fotos_perfil/default.png')
 
     class Meta:

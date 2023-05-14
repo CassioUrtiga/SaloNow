@@ -18,6 +18,74 @@
 {% block content %}
 
     {% if verificacao %}
+        <!-- Modal change location -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">
+                            Alterar localidade
+                        </h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{% url 'atualizar-cep-cliente' %}" method="post">
+                            {% csrf_token %}
+                            <div class="accordion" id="accordionExample">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                            Sabe o CEP? Vamos lá!
+                                        </button>
+                                    </h2>
+                                    <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            <div>
+                                                <input type="text" name="cep" id="cep" class="form-control" placeholder="CEP" data-mask="00000-000">
+                                            </div>
+                                            <div class="text-center mt-3" id="msg-error1">
+                                                <p class="mb-0"></p>
+                                            </div>
+                                            <input type="hidden" name="validation_message1" id="validation_message1" value="">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                            Não sabe o CEP? Tente pela cidade!
+                                        </button>
+                                    </h2>
+                                    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <input type="text" name="cidade" id="cidade" class="form-control" placeholder="Cidade">
+                                                </div>
+                                                <div class="col-6">
+                                                    <input type="text" name="uf" id="uf" class="form-control" placeholder="Uf" maxlength="2">
+                                                </div>
+                                                <div class="text-center mt-3" id="msg-error2">
+                                                    <p class="mb-0"></p>
+                                                </div>
+                                                <input type="hidden" name="validation_message2" id="validation_message2" value="">
+                                                <button type="button" class="btn btn-primary mt-3" id="pesquisar">
+                                                    <i class="fa fa-search"></i> Pesquisar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                <input type="submit" class="btn btn-primary" value="Salvar alterações">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <header>
             <abbr title="Página inicial">
                 <a href="{% url 'inicio' %}">
@@ -28,13 +96,15 @@
                 <img src={{ cliente.foto_perfil.thumbnail.url }} alt="">
                 <h3>{{ cliente.nome_completo|title }}</h3>
             </div>
-            <div>
-                <button type="button" class="btn">
+            <div class="btn-group">
+                <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" id="localidade">
+                    {{ cliente.cidade }}, {{ cliente.uf }}
+                    <img src="{% static 'imgs/person_local.png' %}" alt="Localidade">
+                </button>
+                <button>
                     <img src="{% static 'imgs/settings.png' %}" alt="Configurações">
                 </button>
-                <a href="{% url 'deslogar' %}">
-                    <button type="button" class="btn btn-danger">Sair</button>
-                </a>
+                <button onclick="btn_sair()">Sair</button>
             </div>
         </header>
         {% if quantidade != 0 %}
@@ -85,7 +155,7 @@
                 <h1 class="mt-5">Nenhum salão encontrado</h1>
             {% else %}
                 {% for salao in saloes %}
-                    <div class="card mb-3 w-75" style="box-shadow: 1px 1px 15px 3px rgba(0, 0, 0, 0.371);">
+                    <div class="card mb-3 w-75 div-salao" style="box-shadow: 1px 1px 15px 3px rgba(0, 0, 0, 0.371);">
                         <div class="card-body organiza">
                             <p class="card-text">
                                 <small class="text-body-secondary">
@@ -101,7 +171,7 @@
                             <p class="card-text"><small class="text-body-secondary">Dias de funcionamento</small></p>
                         </div>
                         {% if salao.dias_funcionamento.all|length == 0 %}
-                            <h5 style="margin-left: 1.5em;">
+                            <h5 class="nenhum-item">
                                 Nenhum dia de funcionamento
                             </h5>
                         {% else %}
@@ -130,7 +200,7 @@
                             <p class="card-text"><small class="text-body-secondary">Serviços disponíveis</small></p>   
                         </div>
                         {% if salao.servico.all|length == 0 %}
-                            <h5 style="margin-left: 1.5em;">
+                            <h5 class="nenhum-item">
                                 Nenhum serviço disponível
                             </h5>
                         {% else %}
@@ -571,7 +641,11 @@
 
 {% block script %}
         {% if verificacao %}
-            
+            <script src="{% static 'js/page_principal/filter_location.js' %}"></script>
+            <script src="{% static 'js/page_principal/change_location.js' %}"></script>
+            <script>
+                function btn_sair(){window.location.href="{% url 'deslogar' %}"}
+            </script>
         {% else %}
             <script src="{% static 'js/page_principal/input_image.js' %}"></script>
             <script src="{% static 'js/page_principal/add_service.js' %}"></script>
