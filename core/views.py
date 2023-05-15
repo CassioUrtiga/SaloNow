@@ -55,20 +55,20 @@ def cadastrar_cliente(request):
             username = form_cliente.data['username']
             email = form_cliente.data['email']
             senha = form_cliente.data['senha']
-
             dados_cep = None
+
+            # Faz uma nova requisição para verificar a veracidade do cep
             try:
                 cep = requests.get(f"https://viacep.com.br/ws/{form_cliente.data['cep'].replace('-','')}/json/")
                 
                 dados_cep = cep.json()
-                if cep.status_code != 200 or dados_cep.get('erro', False):
-                    messages.error(request, 'CEP inválido')
-                    return render(request, 'page_login/cadastro_cliente.html', {'form': form_cliente})
+                if dados_cep.get('erro'):
+                    raise Exception()
             except:
                 messages.error(request, 'CEP inválido')
                 return render(request, 'page_login/cadastro_cliente.html', {'form': form_cliente})
-
-
+            
+            # Realiza o cadastro do cliente 
             if User.objects.filter(username=username).exists():
                 messages.warning(request, f'Usuário {username} já existe!')
                 return render(request, 'page_login/cadastro_cliente.html', {'form': form_cliente})
@@ -86,7 +86,6 @@ def cadastrar_cliente(request):
                 messages.success(request, 'Cadastro realizado com sucesso!')
                 return redirect('login') 
         else:
-            print(form_cliente.errors)
             if (verificar_formato_email(form_cliente.data['email'])):
                 messages.error(request, 'Formulário inválido!')
                 return render(request, 'page_login/cadastro_cliente.html', {'form': FormularioCliente()})
@@ -113,7 +112,7 @@ def cadastrar_proprietario(request):
                     resposta = requests.get(f"https://receitaws.com.br/v1/cnpj/{cnpj}")
 
                     dados = resposta.json()
-                    if resposta.status_code != 200 or dados['status'] == 'ERROR':
+                    if dados['status'] == 'ERROR':
                         messages.error(request, 'CNPJ inválido')
                         return render(request, 'page_login/cadastro_proprietario.html', {'form': form_proprietario})
                 except:
