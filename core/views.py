@@ -330,6 +330,12 @@ def atualizar_cep_cliente(request):
 def aguardar(request):
     return render(request, 'page/aguarde.html')
 
+def agendamento_cliente(request,id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    return render(request,'page/agendamento_cliente.html')
+
 
 # Functions
 def verificar_formato_email(email):
