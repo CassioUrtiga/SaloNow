@@ -5,7 +5,7 @@ from .models import Cliente, Proprietario, Salon
 class FormularioCliente(forms.ModelForm):
     class Meta:
         model = Cliente
-        fields = ('nome_completo', 'username' ,'email', 'senha', 'foto_perfil')
+        fields = ('nome_completo', 'username' ,'email', 'senha', 'foto_perfil', 'cep', 'cidade', 'uf')
 
     nome_completo = forms.CharField(required=True, max_length=100, widget=forms.TextInput(attrs={
         'id': 'nome',
@@ -34,6 +34,24 @@ class FormularioCliente(forms.ModelForm):
         'class': 'form-control',
         'name': 'senha',
         'placeholder': 'Senha'
+    }))
+
+    cep = forms.CharField(required=True, widget=forms.TextInput(attrs={
+        'id': 'cep',
+        'class': 'form-control',
+        'name': 'cep',
+        'placeholder': 'CEP',
+        'data-mask': '00000-000'
+    }))
+
+    cidade = forms.CharField(required=False, widget=forms.HiddenInput(attrs={
+        'name': 'cidade',
+        'value': '',
+    }))
+
+    uf = forms.CharField(required=False, widget=forms.HiddenInput(attrs={
+        'name': 'uf',
+        'value': '',
     }))
 
 

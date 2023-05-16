@@ -39,6 +39,13 @@
                     <label for="nome">Nome completo</label>
                 </div>
                 <div class="form-floating">
+                    {{ form.cep }}
+                    <label for="cep">CEP</label>
+                </div>
+                <div id="msg-error">
+                    <p style="color: white;"></p>
+                </div>
+                <div class="form-floating">
                     {{ form.username }}
                     <label for="username">Usuário</label>
                 </div>
@@ -78,5 +85,34 @@
                 }
             });
         });
+    </script>
+    <script>
+        let cep = document.getElementById('cep')
+        let valor = ''
+
+        cep.addEventListener('input', ()=>{
+            valor = cep.value
+            if (valor.length === 9){
+                $.ajax({
+                    url: `https://viacep.com.br/ws/${valor.replace('-','')}/json/`,
+                    type: "get",
+                    success: function(dados,status){
+                        if (dados.erro === true || status == 'error' || dados.erro === 'true'){
+                            $('#msg-error p').text('CEP inválido')
+                            $('#msg-error').fadeIn()
+                        }else{
+                            $('#msg-error p').text(`${dados.localidade}, ${dados.uf}`)
+                            $('#msg-error').fadeIn()
+                        }
+                    },
+                    error: function(){
+                        $('#msg-error p').text('Aguarde um momento e tente novamente!')
+                        $('#msg-error').fadeIn()
+                    },
+                })
+            }else{
+                $('#msg-error').fadeOut()
+            }
+        })
     </script>
 {% endblock script %}
