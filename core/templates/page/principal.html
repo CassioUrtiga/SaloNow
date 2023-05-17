@@ -155,7 +155,7 @@
                 <h1 class="mt-5">Nenhum salão encontrado</h1>
             {% else %}
                 {% for salao in saloes %}
-                    <div class="card mb-3 w-75 div-salao" style="box-shadow: 1px 1px 15px 3px rgba(0, 0, 0, 0.371);">
+                    <div class="card mb-3 w-75 div-salao" id="{{ salao.id }}" style="box-shadow: 1px 1px 15px 3px rgba(0, 0, 0, 0.371);">
                         <div class="card-body organiza">
                             <p class="card-text">
                                 <small class="text-body-secondary">
@@ -235,8 +235,8 @@
                             </div>
                         </div>
                         <div class="card-body m-auto">
-                            <a href="#">
-                                <button type="button" class="btn btn-primary ">Realizar agendamento</button>
+                            <a onclick= "agendamento(event)">
+                                <button type="button" class="btn btn-primary" >Realizar agendamento</button>
                             </a>
                         </div>
                     </div>
@@ -643,8 +643,12 @@
         {% if verificacao %}
             <script src="{% static 'js/page_principal/filter_location.js' %}"></script>
             <script src="{% static 'js/page_principal/change_location.js' %}"></script>
+
             <script>
                 function btn_sair(){window.location.href="{% url 'deslogar' %}"}
+                function agendamento(event){
+                    window.location.href= '/agendamento-cliente/'+ event.target.parentNode.parentNode.parentNode.getAttribute("id")
+                }
             </script>
         {% else %}
             <script src="{% static 'js/page_principal/input_image.js' %}"></script>

@@ -5,7 +5,7 @@ from .views import (
     cadastrar_cliente, cadastrar_proprietario, 
     login_view, logout_view, criar_salao, 
     excluirSalao, filtrar_salao, editar_salao,
-    atualizar_cep_cliente
+    atualizar_cep_cliente, agendamento_cliente
 )
 
 urlpatterns = [
@@ -21,4 +21,5 @@ urlpatterns = [
     path('filtrar-salao/', filtrar_salao, name='filtrar-salao'),
     path('editar-salao/<int:id>/', editar_salao, name='editar-salao'),
     path('atualizar-cep-cliente/', atualizar_cep_cliente, name='atualizar-cep-cliente'),
+    path('agendamento-cliente/<int:id>/', agendamento_cliente, name='agendamento-cliente')
 ]
