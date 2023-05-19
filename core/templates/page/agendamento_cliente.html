@@ -1,0 +1,47 @@
+{% extends '../base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/agendamento_cliente.css' %}">
+{% endblock css %}
+
+{% block title %}
+    <title>Agendamento</title>
+{% endblock title %}
+
+{% block content %}
+    <form id="msform">
+      <!-- progressbar -->
+      <ul id="progressbar">
+        <li class="active text-black">Confirmar Dados</li>
+        <li class="text-black">Agendamento</li>
+        <li class="text-black">Formas de pagamento</li>
+      </ul>
+      <!-- fieldsets -->
+      <fieldset>
+        <h2 class="fs-title">Verifique os dados</h2>
+        <h3 class="fs-subtitle">Etapa 1</h3>
+        <input type="text" name="nome" placeholder="Nome">
+        <input type="text" name="email" placeholder="Email" />
+        <input type="button" name="next" class="next action-button" value="Próximo" />
+      </fieldset>
+      <fieldset>
+        <h2 class="fs-title">Realizar Agendamento</h2>
+        <h3 class="fs-subtitle">-</h3>
+        <input type="text" name="servico" placeholder="Serviço"/>
+        <input type="button" name="previous" class="previous action-button" value="Anterior" />
+        <input type="button" name="next" class="next action-button" value="Próximo" />
+      </fieldset>
+      <fieldset>
+        <h2 class="fs-title">Realizar Pagamento</h2>
+        <h3 class="fs-subtitle">Escolha sua forma de pagamento</h3>
+        <input type="button" name="previous" class="previous action-button" value="Anterior" />
+        <a href="#" class="submit action-button" target="_top">Enviar</a>
+      </fieldset>
+    </form>
+{% endblock content %}
+
+{% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+    <script src="{% static 'js/page_agendamento/agendar_cliente.js' %}"></script>
+{% endblock script %}
