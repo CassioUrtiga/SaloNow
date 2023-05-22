@@ -9,7 +9,11 @@ from .models import Cliente, Proprietario, Salon, DiasFuncionamento, Servicos
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from functools import reduce
-
+import base64
+from PIL import Image
+from io import BytesIO
+import tempfile
+from django.core.files.base import ContentFile
 
 # Views
 def tela_inicial(request):
@@ -163,10 +167,11 @@ def criar_salao(request):
     if not request.user.is_authenticated:
         return redirect('login')
     
-    form = FormularioSalao(request.POST, request.FILES)
+    form = FormularioSalao(request.POST)
+
     if form.is_valid():
         dados = []
-
+        
         # Obter os valores das caixas de seleção
         dias_selecionados = request.POST.getlist('segunda') + request.POST.getlist('terca') + request.POST.getlist('quarta') + request.POST.getlist('quinta') + request.POST.getlist('sexta') + request.POST.getlist('sabado') + request.POST.getlist('domingo')
 
@@ -176,19 +181,33 @@ def criar_salao(request):
             abertura = request.POST.get(f'temp_aberto_{dia[:3].lower()}')
             fechamento = request.POST.get(f'temp_fecha_{dia[:3].lower()}')
             dados.append([dia, abertura, fechamento])
-        
+
         salao = Salon.objects.create(
             proprietario=Proprietario.objects.get(user_id=request.user.id),
             nome_salao=form.cleaned_data['nome_salao'],
             descricao=form.cleaned_data['descricao'],
-            salao_image=form.cleaned_data['salao_image'],
             cidade=form.cleaned_data['cidade'],
             rua=form.cleaned_data['rua'],
             pais=form.cleaned_data['pais'],
             bairro=form.cleaned_data['bairro'],
             numero=form.cleaned_data['numero']
         )
-        
+
+        # verifica o estado da imagem enviada
+        salao_status = request.POST.get('img_salao')
+         
+        if salao_status == '':
+            salao.imagem_salao = 'fotos_salao/default.jpg'
+        else:
+            imagem_decodificada = decode_base64_image(salao_status)
+            with tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False) as temp_file:
+                imagem_decodificada.save(temp_file, format='JPEG')
+                temp_file.seek(0)
+                file_content = temp_file.read()
+            
+            content_file = ContentFile(file_content)
+            salao.imagem_salao.save(temp_file.name, content_file)
+            
         for obj in dados:
             dia = DiasFuncionamento.objects.create(dia_semana=obj[0],abertura=obj[1] if obj[1] else '00:00:00', fechamento=obj[2] if obj[2] else '00:00:00')
             salao.dias_funcionamento.add(dia)
@@ -253,15 +272,14 @@ def editar_salao(request, id):
     if not request.user.is_authenticated:
         return redirect('login')
     
-    salao = get_object_or_404(Salon, proprietario=Proprietario.objects.get(user_id=request.user.id), pk=id)
-
     form = FormularioSalao(request.POST, request.FILES)
+
     if form.is_valid():
         dados = []
+        salao = get_object_or_404(Salon, proprietario=Proprietario.objects.get(user_id=request.user.id), pk=id)
 
         # Obter os valores das caixas de seleção
         dias_selecionados = request.POST.getlist('segunda') + request.POST.getlist('terca') + request.POST.getlist('quarta') + request.POST.getlist('quinta') + request.POST.getlist('sexta') + request.POST.getlist('sabado') + request.POST.getlist('domingo')
-
 
         # Obter as horas de abertura e fechamento para o dia atual
         for dia in dias_selecionados:
@@ -269,7 +287,6 @@ def editar_salao(request, id):
             fechamento = request.POST.get(f'temp_fecha_{dia[:3].lower()}')
             dados.append([dia, abertura, fechamento])
         
-        #salao_image=form.cleaned_data['salao_image']
         salao.nome_salao = form.cleaned_data['nome_salao']
         salao.descricao = form.cleaned_data['descricao']
         salao.cidade = form.cleaned_data['cidade']
@@ -290,7 +307,26 @@ def editar_salao(request, id):
         
         for i, obj in enumerate(input_servicos):
             salao.servico.add(Servicos.objects.create(servico=obj, preco=input_precos[i]))
+
+        # verifica o estado da imagem enviada
+        salao_status = request.POST.get('img_salao')
         
+        if salao_status != 'null':
+            if 'default.jpg' not in salao.imagem_salao.url:
+                salao.imagem_salao.delete()
+
+            if salao_status == '':
+                salao.imagem_salao = 'fotos_salao/default.jpg'
+            else:
+                imagem_decodificada = decode_base64_image(salao_status)
+                with tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False) as temp_file:
+                    imagem_decodificada.save(temp_file, format='JPEG')
+                    temp_file.seek(0)
+                    file_content = temp_file.read()
+                
+                content_file = ContentFile(file_content)
+                salao.imagem_salao.save(temp_file.name, content_file)
+
         salao.save()
         messages.success(request, f'Salão {salao.nome_salao.upper()} foi alterado com sucesso')
         return redirect('principal')
@@ -337,3 +373,12 @@ def verificar_formato_email(email):
         return True
     else:
         return False
+
+def decode_base64_image(base64_string):
+    encoded_data = base64_string.split(',')[1]
+
+    image_data = base64.b64decode(encoded_data)
+
+    image = Image.open(BytesIO(image_data))
+
+    return image

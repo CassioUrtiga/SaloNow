@@ -100,7 +100,7 @@ class FormularioProprietario(forms.ModelForm):
 class FormularioSalao(forms.ModelForm):
     class Meta:
         model = Salon
-        fields = ('nome_salao', 'descricao', 'salao_image', 'cidade', 'rua', 'pais', 'bairro', 'numero')
+        fields = ('nome_salao', 'descricao', 'cidade', 'rua', 'pais', 'bairro', 'numero')
     
     nome_salao = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
         'id': 'salon-name',
@@ -156,11 +156,4 @@ class FormularioSalao(forms.ModelForm):
         'max': 1000,
         'style': 'width: 6.2em;'
     }))
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['salao_image'].widget.attrs.update({
-            'class': 'picture_image',
-            'id': 'image'
-        })
         

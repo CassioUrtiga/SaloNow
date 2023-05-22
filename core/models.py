@@ -73,7 +73,7 @@ class Salon(models.Model):
     descricao = models.TextField(default='Descrição do salão')
     dias_funcionamento = models.ManyToManyField(DiasFuncionamento, verbose_name='dias_funcionamento')
     servico = models.ManyToManyField(Servicos, verbose_name='servicos')
-    salao_image = StdImageField('salao_image', upload_to=get_file_path_salon, variations={'thumbnail': (700, 200, True)}, default='fotos_salao/default.jpg')
+    imagem_salao = StdImageField('imagem_salao', upload_to=get_file_path_salon, default='fotos_salao/default.jpg')
     cidade = models.CharField(max_length=30, default='Sem local')
     rua = models.CharField(max_length=100, default='Sem local')
     pais = models.CharField(max_length=30, default='Sem local')
@@ -85,8 +85,8 @@ class Salon(models.Model):
 
 @receiver(pre_delete, sender=Salon)
 def salon_delete_img(sender, instance, **kwargs):
-    if instance.salao_image and instance.salao_image.path:
-        if os.path.basename(instance.salao_image.path) != 'default.jpg':
-            if os.path.isfile(instance.salao_image.path):
-                os.remove(instance.salao_image.path)
-            instance.salao_image.delete_variations()
+    # Excluir a imagem do salão, se existir
+    if instance.imagem_salao and instance.imagem_salao.path:
+        if os.path.basename(instance.imagem_salao.path) != 'default.jpg':
+            if os.path.isfile(instance.imagem_salao.path):
+                os.remove(instance.imagem_salao.path)
