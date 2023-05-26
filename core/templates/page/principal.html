@@ -8,6 +8,7 @@
     {% else %}
         <link rel="stylesheet" href="{% static 'css/principal_proprietario.css' %}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.css">
     {% endif %}
 {% endblock css %}
 
@@ -164,7 +165,7 @@
                                 </small>
                             </p>
                         </div>
-                        <img src="{{ salao.salao_image.thumbnail.url }}" class="card-img-top" alt="Salão imagem">
+                        <img src="{{ salao.imagem_salao.url }}" class="card-img-top" alt="Salão imagem">
                         <div class="card-body">
                             <h5 class="card-title">{{ salao.nome_salao|title }}</h5>
                             <p class="card-text">{{ salao.descricao }}</p>
@@ -244,19 +245,8 @@
             {% endif %}
         </main>
     {% else %}
-        <header>
-            <abbr title="Página inicial">
-                <a href="{% url 'inicio' %}">
-                    <img src="https://via.placeholder.com/100x48" alt="logo">
-                </a>
-            </abbr>
-            <h3>{{ proprietario.nome_completo|title }}</h3>
-            <a href="{% url 'deslogar' %}">
-                <button type="button" class="btn btn-danger">Sair</button>
-            </a>
-        </header>
         <!-- Modal add salon -->
-        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal fade modal-xl" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content" id="modalsalon">
                     <div class="modal-header">
@@ -264,20 +254,10 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form method="post" enctype="multipart/form-data" autocomplete="off">
+                        <form id="form-salao" method="post" enctype="multipart/form-data" autocomplete="off">
                             {% csrf_token %}
-                            <h3>Características do salão</h3>
-                            <label for="image" class="picture" tabindex="0">
-                                {{ form.salao_image }}
-                                <span class="picture_image" id="imgs">
-                                    Escolher banner (700x200)
-                                </span>
-                            </label>
-                            <div class="edit-image d-flex justify-content-center mb-2 mt-2">
-                                <button type="button" class="btn btn-danger" onclick="
-                                    document.getElementById('imgs').innerHTML='Escolher banner (700x200)'
-                                ">Remover imagem</button>
-                            </div>
+                            <div id="temp-content"></div>
+                            <h3>Descrição</h3>
                             <div class="form-floating mb-2">
                                 {{ form.nome_salao }}
                                 <label for="salon-name">Nome do salão</label>
@@ -425,7 +405,7 @@
                                 </table>
                             </div>
                             <div class="modal-footer">
-                                <input type="submit" class="btn btn-success" value="">
+                                <input type="button" class="btn btn-success" id="submit-form" value="">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                             </div>
                         </form>
@@ -448,6 +428,17 @@
                 </div>
             </div>
         </div>
+        <header>
+            <abbr title="Página inicial">
+                <a href="{% url 'inicio' %}">
+                    <img src="https://via.placeholder.com/100x48" alt="logo">
+                </a>
+            </abbr>
+            <h3>{{ proprietario.nome_completo|title }}</h3>
+            <a href="{% url 'deslogar' %}">
+                <button type="button" class="btn btn-danger">Sair</button>
+            </a>
+        </header>
         <!-- block user -->
         <div class="user-bar">
             <div class="dados">
@@ -512,7 +503,9 @@
         </div>
         <main>
             <div>
-                <h1>Meus salões - {{ quantidade }}</h1>
+                <div class="top-menu-salao">
+                    <h1 style="font-size: 1.7em;">Meus salões - {{ quantidade }}</h1>
+                </div>
                 {% for message in messages %}
                     {% if message.tags == 'error' %}
                         <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
@@ -553,14 +546,15 @@
                                     </span>
                                 </button> 
                             </div>
-                            <img src="{{ salao.salao_image.thumbnail.url }}" class="card-img-top" alt="Salão imagem">
+                            <input type="hidden" value={{ salao.imagem_salao.url }}>
+                            <img src="{{ salao.imagem_salao.url }}" class="card-img-top" alt="Salão imagem">
                             <div class="card-body div2">
                                 <h3 class="card-title">{{ salao.nome_salao|title }}</h3>
                                 <p class="card-text">{{ salao.descricao }}</p>
                                 <p class="card-text"><small class="text-body-secondary">Dias de funcionamento ( {{ salao.dias_funcionamento.all|length }} )</small></p>
                             </div>
                             {% if salao.dias_funcionamento.all|length == 0 %}
-                                <h5 style="margin-left: 1.5em;">
+                                <h5 class="nenhum-item">
                                     Nenhum dia de funcionamento
                                 </h5>
                             {% else %}
@@ -589,7 +583,7 @@
                                 <p class="card-text"><small class="text-body-secondary">Serviços disponíveis ( {{ salao.servico.all|length }} )</small></p>   
                             </div>
                             {% if salao.servico.all|length == 0 %}
-                                <h5 style="margin-left: 1.5em;">
+                                <h5 class="nenhum-item">
                                     Nenhum serviço disponível
                                 </h5>
                             {% else %}
@@ -651,8 +645,8 @@
                 }
             </script>
         {% else %}
-            <script src="{% static 'js/page_principal/input_image.js' %}"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
             <script src="{% static 'js/page_principal/add_service.js' %}"></script>
-            <script src="{% static 'js/page_principal/add_edit_salon.js' %}"></script>
+            <script src="{% static 'js/page_principal/salon.js' %}"></script>
         {% endif %}
 {% endblock script %}
