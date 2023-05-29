@@ -17,7 +17,6 @@
 {% endblock title %}
 
 {% block content %}
-
     {% if verificacao %}
         <!-- Modal change location -->
         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -131,9 +130,6 @@
                     </button>
                 </a>
             </div>
-            <div class="text-center">
-                <h4>Total de salões: {{ quantidade }}</h4>
-            </div>
             <div>
                 {% for message in messages %}
                     {% if message.tags == 'success' %}
@@ -144,6 +140,12 @@
                     {% endif %}
                     {% if message.tags == 'warning' %}
                         <div class="alert alert-warning alert-dismissible fade show text-center" role="alert" style="margin-left: 4em; margin-right: 4em; margin-top: 1em;">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+                    {% if message.tags == 'error' %}
+                        <div class="alert alert-danger alert-dismissible fade show text-center" role="alert" style="margin-left: 4em; margin-right: 4em; margin-top: 1em;">
                             {{ message }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
@@ -161,7 +163,7 @@
                             <p class="card-text">
                                 <small class="text-body-secondary">
                                     <img src="{% static 'imgs/local.png' %}" alt="Localização">
-                                    {{ salao.cidade }}, {{ salao.rua }}, {{ salao.bairro }} - {{ salao.numero }}, ({{ salao.pais }})
+                                    {{ salao.cidade|title }}, {{ salao.rua|title }}, {{ salao.bairro|title }} - {{ salao.numero }}, ({{ salao.pais|title }})
                                 </small>
                             </p>
                         </div>
@@ -235,11 +237,25 @@
                                 <p>0 - Achei duvidoso</p>
                             </div>
                         </div>
-                        <div class="card-body m-auto">
-                            <a onclick= "agendamento(event)">
-                                <button type="button" class="btn btn-primary" >Realizar agendamento</button>
-                            </a>
-                        </div>
+                        {% if salao.dias_funcionamento.all|length == 0 or salao.servico.all|length == 0 or salao.id in verifica_horarios%}
+                            <div class="card-body m-auto">
+                                <h1 style="font-size: 1.3em;">*Lamentamos, mas o salão encontra-se fechado no momento*</h1>
+                            </div>
+                        {% else %}
+                            {% if salao.id in agendamentos_salao_id %}
+                                <div class="card-body m-auto">
+                                    <a href= "{% url 'detalhes-agendamento-especifico' %}">
+                                        <button type="button" class="btn btn-success" >Visualizar agendamento</button>
+                                    </a>
+                                </div>
+                            {% else %}
+                                <div class="card-body m-auto">
+                                    <a onclick= "agendamento(event)">
+                                        <button type="button" class="btn btn-primary" >Realizar agendamento</button>
+                                    </a>
+                                </div>
+                            {% endif %}
+                        {% endif %}
                     </div>
                 {% endfor %}
             {% endif %}
@@ -290,7 +306,17 @@
                             <h3>Serviços disponíveis</h3>
                             <div>
                                 <button id="add-button" class="btn btn-primary mb-3"><i class="fas fa-plus"></i> Adicionar serviço</button>
-                                <table id="input-container"></table>
+                                <table style="display: none; border-collapse: separate; border-spacing: 20px;">
+                                    <thead class="table">
+                                        <tr>
+                                          <th scope="col">Serviço</th>
+                                          <th scope="col">Preço</th>
+                                          <th scope="col">Tempo homem</th>
+                                          <th scope="col">Tempo mulher</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="table-group-divider" id="input-container"></tbody>
+                                </table>
                             </div>
                             <div>
                                 <h3>Dias de funcionamento</h3>
@@ -464,12 +490,14 @@
                 <div class="accordion-item">
                   <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapseTwo" aria-expanded="false" aria-controls="panelsStayOpen-collapseTwo">
-                      Agendamentos
+                        Agendamentos
                     </button>
                   </h2>
                   <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
                     <div class="accordion-body">
-                      Lorem, ipsum dolor sit amet consectetur adipisicing elit. Nam saepe fugiat, molestiae culpa praesentium pariatur totam qui. Aliquid nulla maiores, iure dolore ipsam veritatis fugiat temporibus cupiditate repellat unde voluptate.
+                        <a href="{% url 'detalhes-agendamento-proprietario' %}">
+                            <button type="button" class="btn btn-primary">Visualizar todos</button>
+                        </a>
                     </div>
                   </div>
                 </div>
@@ -503,8 +531,9 @@
         </div>
         <main>
             <div>
-                <div class="top-menu-salao">
-                    <h1 style="font-size: 1.7em;">Meus salões - {{ quantidade }}</h1>
+                <div class="top-dashboard-salon">
+                    <h1 class="dashboard">Salões - {{ quantidade }}</h1>
+                    <h1 class="dashboard">Agendamentos - {{ agendamentos_salao_id|length }}</h1>
                 </div>
                 {% for message in messages %}
                     {% if message.tags == 'error' %}
@@ -538,13 +567,19 @@
                                         {{ salao.cidade|title }}, {{ salao.rua|title }}, {{ salao.bairro|title }} - {{ salao.numero }}, ( {{ salao.pais|title }} )
                                     </small>
                                 </p> 
-                                <button type="button" class="btn btn-primary position-relative" style="margin-right: 12px;">
-                                    Agendamentos
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    0
-                                    <span class="visually-hidden">unread messages</span>
-                                    </span>
-                                </button> 
+                                <a href="{% url 'detalhes-agendamento-especifico' %}">
+                                    <button type="button" class="btn btn-primary position-relative" style="margin-right: 12px; font-size: 1.5em;">
+                                        Agendamentos
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {% for obj in agendamentos_salao_id %}
+                                                {% if salao.id == obj.0 %}
+                                                    {{ obj.1 }}
+                                                {% endif %}
+                                            {% endfor %}
+                                        <span class="visually-hidden">unread messages</span>
+                                        </span>
+                                    </button>
+                                </a>
                             </div>
                             <input type="hidden" value={{ salao.imagem_salao.url }}>
                             <img src="{{ salao.imagem_salao.url }}" class="card-img-top" alt="Salão imagem">
@@ -593,13 +628,17 @@
                                             <tr>
                                               <th scope="col">Serviço</th>
                                               <th scope="col">Preço</th>
+                                              <th scope="col">Duração homem</th>
+                                              <th scope="col">Duração mulher</th>
                                             </tr>
                                         </thead>
                                         <tbody class="table-group-divider">
-                                            {% for s in salao.servico.all %}
+                                            {% for obj in salao.servico.all %}
                                                 <tr>
-                                                    <td>{{ s.servico|title }}</td>
-                                                    <td>R$ {{ s.preco }}</td>
+                                                    <td>{{ obj.servico|title }}</td>
+                                                    <td>R$ {{ obj.preco }}</td>
+                                                    <td>{{ obj.duracao_maxima_homem }}</td>
+                                                    <td>{{ obj.duracao_maxima_mulher }}</td>
                                                 </tr>
                                             {% endfor %}
                                         </tbody>

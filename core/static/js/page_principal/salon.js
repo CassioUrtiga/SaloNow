@@ -38,7 +38,6 @@ btnAddSalon.addEventListener('click', ()=>{
 
 // Editar salão
 function editarSalao(event){
-    
     let elementoPai = event.target.closest('.card-body').parentNode
     let imagem_url = elementoPai.querySelector('input').value
     imagem_atual = imagem_url
@@ -66,6 +65,7 @@ function editarSalao(event){
     nameSalon.value = elementoPai.querySelector('.div2 h3').innerText
     descricao.value = elementoPai.querySelector('.div2 p').innerText
     servicos.innerHTML = ''
+    servicos.parentNode.style.display = 'block'
 
     locations[0].value = localidade[0]
     locations[1].value = localidade[4]
@@ -74,7 +74,7 @@ function editarSalao(event){
     locations[4].value = localidade[3]
     
     // Preenche os serviços
-    for (let i=0; i<services.length; i+=2){
+    for (let i=0; i<services.length; i+=4){
         let newRow = document.createElement('tr')
     
         newRow.innerHTML = `
@@ -83,7 +83,13 @@ function editarSalao(event){
                     <input type="text" class="form-control" name="servicos[]" placeholder="Serviço" value="${services[i].textContent.replace('R$','').trim()}" oninput="event_input_void(event)"" />
                 </td>
                 <td>
-                    <input type="number" class="form-control" step="0.01" name="precos[]" placeholder="Preço" value="${parseFloat(services[i+1].textContent.replace('R$','').replace(',','.').trim())}"/>
+                    <input type="number" class="form-control" step="0.01" min="0.00" name="precos[]" placeholder="Preço" value="${parseFloat(services[i+1].textContent.replace('R$','').replace(',','.').trim())}" oninput="validity.valid||(value='');"/>
+                </td>
+                <td>
+                    <input type="time" class="form-control" name="duracao_homem[]"  value="${services[i+2].textContent}" required />
+                </td>
+                <td>
+                    <input type="time" class="form-control" name="duracao_mulher[]"  value="${services[i+3].textContent}" required />
                 </td>
                 <td>
                     <button class="btn btn-danger remove-button"><i class="fas fa-times"></i> Remover serviço</button>
@@ -94,6 +100,9 @@ function editarSalao(event){
         let removeButton = newRow.querySelector('.remove-button')
         removeButton.addEventListener('click', () => {
             newRow.remove()
+            if (servicos.querySelectorAll('tr').length === 0) {
+                servicos.parentNode.style.display = 'none'
+            }
         })
         
         servicos.appendChild(newRow)

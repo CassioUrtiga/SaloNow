@@ -1,19 +1,23 @@
-import requests
-import re
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from django.contrib.auth.models import User
-from .forms import FormularioCliente, FormularioProprietario, FormularioSalao
-from .models import Cliente, Proprietario, Salon, DiasFuncionamento, Servicos
-from django.shortcuts import get_object_or_404
-from django.db.models import Q
-from functools import reduce
 import base64
-from PIL import Image
-from io import BytesIO
+import re
+import requests
 import tempfile
+from functools import reduce
+from io import BytesIO
+from datetime import datetime
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.db.models import Q
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.files.base import ContentFile
+from PIL import Image
+
+from .forms import FormularioCliente, FormularioProprietario, FormularioSalao
+from .models import Cliente, Proprietario, Salon, DiasFuncionamento, Servicos, Agendamento
+
 
 # Views
 def tela_inicial(request):
@@ -45,10 +49,8 @@ def login_view(request):
     else:
         return render(request, 'page_login/login.html')
 
+@login_required(login_url='login')
 def logout_view(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    
     logout(request)
     return redirect('inicio')
 
@@ -83,6 +85,7 @@ def cadastrar_cliente(request):
                 cliente.user = user
                 cliente.cidade = dados_cep['localidade']
                 cliente.uf = dados_cep['uf']
+                cliente.sexo = form_cliente.data['sexo']
 
                 user.save()
                 cliente.save()
@@ -141,16 +144,36 @@ def cadastrar_proprietario(request):
     else:
         return render(request, 'page_login/cadastro_proprietario.html', {'form': FormularioProprietario()})
 
+@login_required(login_url='login')
 def tela_principal(request):
-    verifica = True
-    if not request.user.is_authenticated:
-        return redirect('login')
-    
-    #verifica = true (cliente) / false (proprietario)
-    verifica = Cliente.objects.filter(user=request.user.id).exists()
+    agendamentos_salao_id = []
+    verifica_horarios_funcionamento = []
 
-    if not verifica:
+    verifica = Cliente.objects.filter(user=request.user.id).exists() # true (cliente) / false (proprietario)
+
+    if verifica: # Caracteríticas do cliente
+        agendamento = Agendamento.objects.filter(cliente=Cliente.objects.get(user=request.user.id))
+
+        # pega os ids do salão para saber quais possuem agendamentos
+        for obj in agendamento:
+            agendamentos_salao_id.append(obj.salao.id)
+        
+        # verifica os horários de funcionamento, retorna os ids inválidos
+        for x in Salon.objects.all():
+            for y in x.dias_funcionamento.all():
+                if (y.abertura > y.fechamento):
+                    verifica_horarios_funcionamento.append(x.id)
+                    break
+            
+    else: # Caracteríticas do proprietário
         prop = Proprietario.objects.get(user_id=request.user.id)
+
+        agendamento = Agendamento.objects.filter(proprietario=prop)
+
+        for obj in agendamento:
+            salao_id = obj.salao.id
+            ocorrencias = agendamento.filter(salao_id=salao_id).count()
+            agendamentos_salao_id.append([salao_id, ocorrencias])
 
     context = {
         'verificacao': verifica,
@@ -158,15 +181,15 @@ def tela_principal(request):
         'proprietario': prop if not verifica else None,
         'form': FormularioSalao() if not verifica else None,
         'saloes': Salon.objects.all() if verifica else Salon.objects.filter(proprietario_id=prop.id),
-        'quantidade': Salon.objects.all().count() if verifica else Salon.objects.filter(proprietario_id=prop.id).count()
+        'quantidade': Salon.objects.all().count() if verifica else Salon.objects.filter(proprietario_id=prop.id).count(),
+        'agendamentos_salao_id': agendamentos_salao_id,
+        'verifica_horarios': verifica_horarios_funcionamento if verifica else None
     }
 
     return render(request, 'page/principal.html', context)
 
+@login_required(login_url='login')
 def criar_salao(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    
     form = FormularioSalao(request.POST)
 
     if form.is_valid():
@@ -213,11 +236,13 @@ def criar_salao(request):
             salao.dias_funcionamento.add(dia)
         
         # Obter os valores dos inputs serviços
-        input_servicos = request.POST.getlist('servicos[]')
-        input_precos = request.POST.getlist('precos[]')
+        servicos = request.POST.getlist('servicos[]')
+        precos = request.POST.getlist('precos[]')
+        duracao_servico_homem = request.POST.getlist('duracao_homem[]')
+        duracao_servico_mulher = request.POST.getlist('duracao_mulher[]')
 
-        for i, obj in enumerate(input_servicos):
-            salao.servico.add(Servicos.objects.create(servico=obj, preco=input_precos[i]))
+        for i, obj in enumerate(servicos):
+            salao.servico.add(Servicos.objects.create(servico=obj, preco=precos[i], duracao_maxima_homem=duracao_servico_homem[i], duracao_maxima_mulher=duracao_servico_mulher[i]))
         
         salao.save()
         messages.success(request, f'Salão {salao.nome_salao.upper()} cadastrado com sucesso')
@@ -226,19 +251,16 @@ def criar_salao(request):
         messages.warning(request, 'Formulário inválido')
         return redirect('principal')
 
+@login_required(login_url='login')
 def excluirSalao(request, id):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    
     salao = get_object_or_404(Salon, proprietario=Proprietario.objects.get(user_id=request.user.id), pk=id)
     messages.error(request, f'Salão {salao.nome_salao.upper()} foi exluído')
     salao.delete()
+
     return redirect('principal')
 
+@login_required(login_url='login')
 def filtrar_salao(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    
     filtro = str(request.POST.get('filtro')).split(',')
     filtro = [s.strip() for s in filtro]
 
@@ -268,10 +290,8 @@ def filtrar_salao(request):
     messages.success(request, f'Foram encontrados {context["quantidade"]} resultados para a busca')
     return render(request, 'page/principal.html', context)
 
+@login_required(login_url='login')
 def editar_salao(request, id):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    
     form = FormularioSalao(request.POST, request.FILES)
 
     if form.is_valid():
@@ -302,11 +322,13 @@ def editar_salao(request, id):
         
         # Obter os valores dos inputs serviços
         salao.servico.clear()
-        input_servicos = request.POST.getlist('servicos[]')
-        input_precos = request.POST.getlist('precos[]')
+        servicos = request.POST.getlist('servicos[]')
+        precos = request.POST.getlist('precos[]')
+        duracao_servico_homem = request.POST.getlist('duracao_homem[]')
+        duracao_servico_mulher = request.POST.getlist('duracao_mulher[]')
         
-        for i, obj in enumerate(input_servicos):
-            salao.servico.add(Servicos.objects.create(servico=obj, preco=input_precos[i]))
+        for i, obj in enumerate(servicos):
+            salao.servico.add(Servicos.objects.create(servico=obj, preco=precos[i], duracao_maxima_homem=duracao_servico_homem[i], duracao_maxima_mulher=duracao_servico_mulher[i]))
 
         # verifica o estado da imagem enviada
         salao_status = request.POST.get('img_salao')
@@ -334,10 +356,8 @@ def editar_salao(request, id):
         messages.warning(request, 'Formulário inválido')
         return redirect('principal')
 
+@login_required(login_url='login')
 def atualizar_cep_cliente(request):
-    if not request.user.is_authenticated:
-        return redirect('login')
-    
     item1 = request.POST.get('validation_message1')
     item2 = request.POST.get('validation_message2')
 
@@ -362,15 +382,75 @@ def atualizar_cep_cliente(request):
 
     return redirect('principal')
 
-def aguardar(request):
-    return render(request, 'page/aguarde.html')
+@login_required(login_url='login')
+def realizar_agendamento(request):
+    try:
+        id_salao = request.POST.get('id_salao')
+        faixa_idade = request.POST.get('idade')
+        total = request.POST.get('total')
+        servicos_selecionados = request.POST.getlist('servicos_selecionados[]')
+        dia = request.POST.get('dia_selecionado')
+        horario = request.POST.get('horario')
 
+        agendamento = Agendamento.objects.create(
+            proprietario = Salon.objects.get(pk=int(id_salao)).proprietario,
+            cliente = Cliente.objects.get(user_id=request.user.id),
+            salao = Salon.objects.get(pk=int(id_salao)),
+            idade = faixa_idade,
+            total_pagar = float(total),
+            dia_selecionado = dia,
+            horario_selecionado = datetime.strptime(horario, "%H:%M").time(),
+        )
+
+        for i, obj in enumerate(servicos_selecionados):
+            agendamento.servico.add(Servicos.objects.get(pk=int(obj)))
+        
+        agendamento.save()
+        
+        messages.success(request, 'Agendamento realizado com sucesso!')
+        return redirect('principal')
+    except:
+        messages.error(request, 'Não foi possível efetuar o agendamento')
+        return redirect('principal')
+
+@login_required(login_url='login')
 def agendamento_cliente(request,id):
-    if not request.user.is_authenticated:
-        return redirect('login')
+    cliente = Cliente.objects.get(user_id=request.user.id)
     
-    return render(request,'page/agendamento_cliente.html')
+    salao = Salon.objects.get(pk=id)
+    
+    servicos = []
+    for obj in salao.servico.all():
+        servicos.append({
+            'id': obj.id,
+            'servico': obj.servico,
+            'preco': obj.preco,
+            'duracao_maxima': obj.duracao_maxima_homem.strftime('%H:%M') if cliente.sexo == 'M' else obj.duracao_maxima_mulher.strftime('%H:%M')
+        })
 
+    context = {
+        'nome': cliente.nome_completo,
+        'email': request.user.email,
+        'servicos': servicos,
+        'dias_funcionamento': salao.dias_funcionamento.all(),
+    }
+    
+    return render(request,'page/agendamento_cliente.html', context)
+
+@login_required(login_url='login')
+def visualizar_agendamento_pg_cliente(request):
+    return render(request,'page/detalhes_agendamento_pg_cliente.html')
+
+@login_required(login_url='login')
+def visualizar_agendamento_pg_proprietario(request):
+    return render(request,'page/detalhes_agendamento_pg_proprietario.html') 
+
+@login_required(login_url='login')
+def visualizar_agendamento_especifico(request):
+    return render(request,'page/detalhes_agendamento_especifico.html')
+
+def aguardar(request):
+    return render(request, 'page/detalhes_agendamento_especifico.html')
 
 # Functions
 def verificar_formato_email(email):
@@ -382,9 +462,6 @@ def verificar_formato_email(email):
 
 def decode_base64_image(base64_string):
     encoded_data = base64_string.split(',')[1]
-
     image_data = base64.b64decode(encoded_data)
-
     image = Image.open(BytesIO(image_data))
-
     return image

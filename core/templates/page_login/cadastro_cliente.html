@@ -18,7 +18,7 @@
                     <h1>SaloNow</h1>
                 </a>
             </abbr>
-            <p class="alinha">Cadastrar cliente</p>
+            <p class="alinha" style="font-size: 1.2em;">Cadastrar cliente</p>
             {% for message in messages %}
                 {% if message.tags == 'warning' %}
                     <div class="alert alert-warning alert-dismissible fade show config" role="alert">
@@ -37,6 +37,14 @@
                 <div class="form-floating">
                     {{ form.nome_completo }}
                     <label for="nome">Nome completo</label>
+                </div>
+                <div class="form-check form-check-inline mb-3" style="font-size: 1.2em;">
+                    <input class="form-check-input" type="radio" name="sexo" id="masc" value="M">
+                    <label class="form-check-label" style="color: white;" for="masc">Masculino</label>
+                </div>
+                <div class="form-check form-check-inline" style="font-size: 1.2em;">
+                    <input class="form-check-input" type="radio" name="sexo" id="fem" value="F">
+                    <label class="form-check-label" style="color: white;" for="fem">Feminino</label>
                 </div>
                 <div class="form-floating">
                     {{ form.cep }}
@@ -62,7 +70,6 @@
                       </button>
                     </div>
                 </div>
-
                 <input type="submit" value="Cadastra-se" id="enviar" class="btn btn-success estado ajuste-input">
             </form>
         </fieldset>
@@ -70,6 +77,7 @@
 {% endblock content %}
 
 {% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js"></script>
     <script>
         $(document).ready(function() {
         // Função que alterna a visibilidade da senha
