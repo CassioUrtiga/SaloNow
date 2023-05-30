@@ -163,7 +163,7 @@ def tela_principal(request):
             for y in x.dias_funcionamento.all():
                 abertura = y.abertura
                 fechamento = y.fechamento
-                if (abertura > fechamento) or (abertura == fechamento) or (abertura == '00:00:00' and fechamento == '00:00:00'):
+                if (abertura > fechamento) or (abertura == fechamento):
                     verifica_horarios_funcionamento.append(x.id)
                     break
             
