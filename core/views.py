@@ -158,10 +158,12 @@ def tela_principal(request):
         for obj in agendamento:
             agendamentos_salao_id.append(obj.salao.id)
         
-        # verifica os horários de funcionamento, retorna os ids inválidos
+        # verifica os horários de funcionamento, retorna os ids inválidos (fechar salão)
         for x in Salon.objects.all():
             for y in x.dias_funcionamento.all():
-                if (y.abertura > y.fechamento):
+                abertura = y.abertura
+                fechamento = y.fechamento
+                if (abertura > fechamento) or (abertura == fechamento) or (abertura == '00:00:00' and fechamento == '00:00:00'):
                     verifica_horarios_funcionamento.append(x.id)
                     break
             
