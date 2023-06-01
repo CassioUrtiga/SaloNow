@@ -47,15 +47,26 @@ main{
     color: #DAFDBA;
 }
 
-.top-menu-salao{
+.top-dashboard-salon{
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
     background-image: linear-gradient(100deg,#13668ae4, transparent);
     border-radius: 50px;
     padding: 12px;
     margin-top: 5px;
     margin-bottom: 10px;
+}
+
+.dashboard{
+    width: 15em;
+    font-size: 1.7em;
+    color: white;
+    background-color: #45c4b192;
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
 }
 
 .nenhum-item{
