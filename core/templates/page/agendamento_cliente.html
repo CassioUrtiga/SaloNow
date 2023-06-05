@@ -93,6 +93,11 @@
                 <input type="button" name="previous" class="previous action-button" value="Anterior" />
                 <input type="button" name="next" class="next action-button" value="Próximo" />
             </div>
+            <div id="horarios-ocupados" style="display: none;">
+                {% for ocupado in horarios_ocupados %}
+                    <input type="hidden" name="{{ ocupado.0 }}" value="{{ ocupado.1 }}/{{ ocupado.2 }}">
+                {% endfor %}
+            </div>
         </fieldset>
         <fieldset>
             <div>

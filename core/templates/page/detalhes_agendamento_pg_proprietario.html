@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" href="{% static 'css/detalhes_agendamento_pg_proprietario.css' %}">
+    <link rel="stylesheet" href="{% static 'css/detalhes_agendamento.css' %}">
 {% endblock css %}
 
 {% block title %}
@@ -10,109 +10,104 @@
 {% endblock title %}
 
 {% block content %}
+    <div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+    {% for message in messages %}
+        {% if message.tags == 'success' %}
+            <div class="alert alert-success alert-dismissible fade show text-center" role="alert" style="margin-left: 4em; margin-right: 4em; margin-top: 1em;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+    {% endfor %}
     <div class="container bootstrap snippets bootdeys">
         <div class="row">
-            <div class="col-md-4 col-sm-6 content-card">
-                <div class="card-big-shadow">
-                    <div class="card card-just-text" data-background="color" data-color="blue" data-radius="none">
-                        <div class="content">
-                            <h6 class="category">SaloNow</h6>
-                            <h4 class="title">Nome do salão</h4>
-                            <p class="description">
-                                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Reprehenderit aspernatur obcaecati nisi corrupti recusandae amet tempora libero ab nulla
-                            </p>
-                            <div>
-                                <button type="button" class="btn btn-danger">Excluir</button>
+            {% for i in agendamentos %}
+                <h1 class="text-center style-title">Salão: {{ i.0.salao.nome_salao|title }}</h1>
+                {% for j in i %}
+                    {% if j.dia_selecionado|lower == dia_atual|lower %}
+                        <div class="col-md-4 col-sm-6 content-card">
+                            <div class="card-big-shadow">
+                                <div class="card card-just-text" data-background="color" data-color="blue" data-radius="none">
+                                    <div class="content">
+                                        <h6 class="category">Agendamento disponível</h6>
+                                        <h4 class="title">{{ j.cliente.nome_completo|title }}</h4>
+                                        <ul class="description">
+                                            <li>Sexo: {{ j.cliente.sexo }}</li>
+                                            <li>Faixa etária: {{ j.idade }}</li>
+                                            <li>Dia: {{ j.dia_selecionado }}</li>
+                                            <li>Horário: {{ j.horario_selecionado }}</li>
+                                            <li>Serviços: 
+                                                {% for k in j.servico.all %}
+                                                    {% if forloop.first %}( {% endif %}
+                                                    {{ k.servico|title }}
+                                                    {% if not forloop.last %}, {% endif %}
+                                                    {% if forloop.last %}){% endif %}
+                                                {% endfor %}
+                                            </li>
+                                            <li>Pagar: R${{ j.total_pagar }}</li>
+                                        </ul>
+                                        <div>
+                                            <button type="button" class="btn btn-success">Concluido</button>
+                                            <button type="button" class="btn btn-danger" onclick="excluirAgendamento({{ j.id }})">Excluir</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div> <!-- end card -->
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-6 content-card">
-                <div class="card-big-shadow">
-                    <div class="card card-just-text" data-background="color" data-color="green" data-radius="none">
-                        <div class="content">
-                            <h6 class="category">SaloNow</h6>
-                            <h4 class="title">Nome do salão</h4>
-                            <p class="description">
-                                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Reprehenderit aspernatur obcaecati nisi corrupti recusandae amet tempora libero ab nulla
-                            </p>
-                            <div>
-                                <button type="button" class="btn btn-danger">Excluir</button>
+                    {% endif %}
+                {% endfor %}
+                {% for j in i %}
+                    {% if j.dia_selecionado|lower != dia_atual|lower %}
+                        <div class="col-md-4 col-sm-6 content-card">
+                            <div class="card-big-shadow">
+                                <div class="card card-just-text" data-background="color" data-color="brown" data-radius="none">
+                                    <div class="content">
+                                        <h6 class="category">Agendamento indisponível</h6>
+                                        <h4 class="title">{{ j.cliente.nome_completo|title }}</h4>
+                                        <ul class="description">
+                                            <li>Sexo: {{ j.cliente.sexo }}</li>
+                                            <li>Faixa etária: {{ j.idade }}</li>
+                                            <li>Dia: {{ j.dia_selecionado }}</li>
+                                            <li>Horário: {{ j.horario_selecionado }}</li>
+                                            <li>Serviços: 
+                                                {% for k in j.servico.all %}
+                                                    {% if forloop.first %}( {% endif %}
+                                                    {{ k.servico|title }}
+                                                    {% if not forloop.last %}, {% endif %}
+                                                    {% if forloop.last %}){% endif %}
+                                                {% endfor %}
+                                            </li>
+                                            <li>Pagar: R${{ j.total_pagar }}</li>
+                                        </ul>
+                                        <div>
+                                            <button type="button" class="btn btn-danger" onclick="excluirAgendamento({{ j.id }})">Excluir</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div> <!-- end card -->
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-6 content-card">
-                <div class="card-big-shadow">
-                    <div class="card card-just-text" data-background="color" data-color="yellow" data-radius="none">
-                        <div class="content">
-                            <h6 class="category">SaloNow</h6>
-                            <h4 class="title">Nome do salão</h4>
-                            <p class="description">
-                                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Reprehenderit aspernatur obcaecati nisi corrupti recusandae amet tempora libero ab nulla
-                            </p>
-                            <div>
-                                <button type="button" class="btn btn-danger">Excluir</button>
-                            </div>
-                        </div>
-                    </div> <!-- end card -->
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-6 content-card">
-                <div class="card-big-shadow">
-                    <div class="card card-just-text" data-background="color" data-color="brown" data-radius="none">
-                        <div class="content">
-                            <h6 class="category">SaloNow</h6>
-                            <h4 class="title">Nome do salão</h4>
-                            <p class="description">
-                                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Reprehenderit aspernatur obcaecati nisi corrupti recusandae amet tempora libero ab nulla
-                            </p>
-                            <div>
-                                <button type="button" class="btn btn-danger">Excluir</button>
-                            </div>
-                        </div>
-                    </div> <!-- end card -->
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-6 content-card">
-                <div class="card-big-shadow">
-                    <div class="card card-just-text" data-background="color" data-color="purple" data-radius="none">
-                        <div class="content">
-                            <h6 class="category">SaloNow</h6>
-                            <h4 class="title">Nome do salão</h4>
-                            <p class="description">
-                                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Reprehenderit aspernatur obcaecati nisi corrupti recusandae amet tempora libero ab nulla
-                            </p>
-                            <div>
-                                <button type="button" class="btn btn-danger">Excluir</button>
-                            </div>
-                        </div>
-                    </div> <!-- end card -->
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-6 content-card">
-                <div class="card-big-shadow">
-                    <div class="card card-just-text" data-background="color" data-color="orange" data-radius="none">
-                        <div class="content">
-                            <h6 class="category">SaloNow</h6>
-                            <h4 class="title">Nome do salão</h4>
-                            <p class="description">
-                                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Reprehenderit aspernatur obcaecati nisi corrupti recusandae amet tempora libero ab nulla
-                            </p>
-                            <div>
-                                <button type="button" class="btn btn-danger">Excluir</button>
-                            </div>
-                        </div>
-                    </div> <!-- end card -->
-                </div>
-            </div>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
         </div>
     </div>
 {% endblock content %}
+
+{% block script %}
+    <script>
+        // quando exluir um salão e o usuário voltar pelas setas de navegação a página é renderizada novamente
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted || window.performance && window.performance.navigation.type === 2) {
+                window.location.href = '/tela-principal/'
+            }
+        }) 
+
+        function excluirAgendamento(id){
+            window.location.href = '/excluir-agendamento/' + id
+        }
+    </script>
+{% endblock script %}

@@ -5,6 +5,7 @@
     {% if verificacao %}
         <link rel="stylesheet" href="{% static 'css/principal_cliente.css' %}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+        <link rel="stylesheet" href="{% static 'css/sidebar_agendamentos.css' %}">
     {% else %}
         <link rel="stylesheet" href="{% static 'css/principal_proprietario.css' %}">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -18,6 +19,89 @@
 
 {% block content %}
     {% if verificacao %}
+        <!--Modal view specific salon-->
+        {% for obj in agendamentos_cliente %}
+            <div class="modal fade" id="viewAgendamento{{obj.salao.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">{{ obj.salao.nome_salao|title }}</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <ul>
+                                <li>Nome: {{ obj.cliente.nome_completo|title }}</li>
+                                <li>Idade: {{ obj.idade }}</li>
+                                <li>Dia: {{ obj.dia_selecionado }}</li>
+                                <li>Horário: {{ obj.horario_selecionado }}</li>
+                            </ul>
+                            <table class="table text-center">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Serviços</th>
+                                        <th scope="col">Preço</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-group-divider">
+                                    {% for i in obj.servico.all %}
+                                        <tr>
+                                            <td>{{ i.servico|title }}</td>
+                                            <td>R${{ i.preco }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="text-center mt-3 mb-3">
+                                <h2 style="font-size: 1em;">Total: R${{ obj.total_pagar }}</h2>
+                            </div>
+                            <button type="button" class="btn btn-danger" onclick="cancelarAgendamento({{ obj.id }})">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        <!--Sidebar ver todos os agendamentos-->
+        <div class="sidebarAgendamento" id="sb1">
+            <header>
+              <h2 style="font-size: 1.1em;">Agendamentos: {{ agendamentos_cliente|length }}</h2>
+              <button type="button" class="btn-close" aria-label="Close" onclick="sidebarToggle()"></button>
+            </header>
+            {% if agendamentos_cliente|length == 0 %}
+                <img class="center-img" src="{% static 'imgs/nenhum_agendamento.png' %}" alt="Nenhum agendamento encontrado">
+            {% else %}
+                <nav class="sidebar-nav">
+                    <ul>
+                        {% for obj in agendamentos_cliente %}
+                            <button onclick="redirectAgendamento({{ obj.salao.id }})">
+                                <li>
+                                    <div class="organiza">
+                                        <strong>{{ obj.salao.nome_salao|title }}</strong>
+                                        <small>{{ obj.dia_selecionado }}/{{ obj.horario_selecionado }}</small>
+                                    </div>
+                                    <p>
+                                        {{ obj.cliente.nome_completo|title }}
+                                    </p>
+                                    <p>
+                                        {% for i in obj.servico.all %}
+                                            {% if forloop.first %}( {% endif %}
+                                            {{ i.servico|title }}
+                                            {% if not forloop.last %} - {% endif %}
+                                            {% if forloop.last %}){% endif %}
+                                        {% endfor %}
+                                    </p>
+                                    <p>Total a pagar: R${{ obj.total_pagar }}</p>
+                                </li>
+                            </button>
+                        {% endfor %}
+                    </ul>
+                </nav>
+                <div class="rodape">
+                    <button type="button" class="btn btn-outline-danger" onclick="cancelarTodosAgendamentos()">Cancelar todos agendamentos</button>
+                </div>
+            {% endif %}
+        </div>
         <!-- Modal change location -->
         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -124,11 +208,13 @@
                         </div>
                     </div>
                 </div>
-                <a href="{% url 'principal' %}">
-                    <button type="button" class="btn btn-outline-primary">
-                        Visualizar todos os salões
-                    </button>
-                </a>
+                <div class="text-center mt-3 mb-3">
+                    <h4>Salões {{quantidade}}</h4>
+                </div>
+            </div>
+            <div class="text-center" style="margin-bottom: 2em;">
+                <button type="button" class="btn btn-outline-primary btn-custom" onclick="sidebarToggle()">Meus agendamentos</button>
+                <button type="button" class="btn btn-outline-primary btn-custom" onclick="telaPrincipal()">Todos os salões</button>
             </div>
             <div>
                 {% for message in messages %}
@@ -244,15 +330,13 @@
                         {% else %}
                             {% if salao.id in agendamentos_salao_id %}
                                 <div class="card-body m-auto">
-                                    <a href= "{% url 'detalhes-agendamento-especifico' %}">
-                                        <button type="button" class="btn btn-success" >Visualizar agendamento</button>
-                                    </a>
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#viewAgendamento{{salao.id}}">
+                                        Visualizar agendamento
+                                    </button>
                                 </div>
                             {% else %}
                                 <div class="card-body m-auto">
-                                    <a onclick= "agendamento(event)">
-                                        <button type="button" class="btn btn-primary" >Realizar agendamento</button>
-                                    </a>
+                                    <button type="button" class="btn btn-primary" onclick="realizarAgendamento({{ salao.id }})" >Realizar agendamento</button>
                                 </div>
                             {% endif %}
                         {% endif %}
@@ -495,9 +579,13 @@
                   </h2>
                   <div id="panelsStayOpen-collapseTwo" class="accordion-collapse collapse">
                     <div class="accordion-body">
-                        <a href="{% url 'detalhes-agendamento-proprietario' %}">
-                            <button type="button" class="btn btn-primary">Visualizar todos</button>
-                        </a>
+                        {% if quantidade_agendamentos == 0 %}
+                            <button type="button" class="btn btn-primary" disabled>Nenhum agendamento disponível</button>
+                        {% else %}
+                            <a href="{% url 'detalhes-agendamento-proprietario' %}">
+                                <button type="button" class="btn btn-primary">Visualizar todos</button>
+                            </a>
+                        {% endif %}
                     </div>
                   </div>
                 </div>
@@ -533,7 +621,7 @@
             <div>
                 <div class="top-dashboard-salon">
                     <h1 class="dashboard">Salões - {{ quantidade }}</h1>
-                    <h1 class="dashboard">Agendamentos - {{ agendamentos_salao_id|length }}</h1>
+                    <h1 class="dashboard">Agendamentos - {{ quantidade_agendamentos }}</h1>
                 </div>
                 {% for message in messages %}
                     {% if message.tags == 'error' %}
@@ -566,20 +654,28 @@
                                         <img src="{% static 'imgs/local.png' %}" alt="Localização">
                                         {{ salao.cidade|title }}, {{ salao.rua|title }}, {{ salao.bairro|title }} - {{ salao.numero }}, ( {{ salao.pais|title }} )
                                     </small>
-                                </p> 
-                                <a href="{% url 'detalhes-agendamento-especifico' %}">
-                                    <button type="button" class="btn btn-primary position-relative" style="margin-right: 12px; font-size: 1.5em;">
+                                </p>
+                                {% if salao.id in agendamentos_disponiveis %}
+                                    <button type="button" class="btn btn-primary position-relative" style="margin-right: 12px; font-size: 1.5em;" onclick="agendamentoEspecifico({{ salao.id }})">
                                         Agendamentos
                                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                             {% for obj in agendamentos_salao_id %}
-                                                {% if salao.id == obj.0 %}
-                                                    {{ obj.1 }}
+                                                {% if salao.id == obj.id %}
+                                                    {{ obj.ocorrencias }}
                                                 {% endif %}
                                             {% endfor %}
                                         <span class="visually-hidden">unread messages</span>
                                         </span>
                                     </button>
-                                </a>
+                                {% else %}
+                                    <button type="button" class="btn btn-primary position-relative" style="margin-right: 12px; font-size: 1.5em;" disabled>
+                                        Agendamentos
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            0
+                                        <span class="visually-hidden">unread messages</span>
+                                        </span>
+                                    </button>
+                                {% endif %}
                             </div>
                             <input type="hidden" value={{ salao.imagem_salao.url }}>
                             <img src="{{ salao.imagem_salao.url }}" class="card-img-top" alt="Salão imagem">
@@ -676,16 +772,46 @@
         {% if verificacao %}
             <script src="{% static 'js/page_principal/filter_location.js' %}"></script>
             <script src="{% static 'js/page_principal/change_location.js' %}"></script>
-
             <script>
                 function btn_sair(){window.location.href="{% url 'deslogar' %}"}
-                function agendamento(event){
-                    window.location.href= '/agendamento-cliente/'+ event.target.parentNode.parentNode.parentNode.getAttribute("id")
+                
+                function realizarAgendamento(id){window.location.href = '/agendamento-cliente/'+ id}
+
+                function cancelarAgendamento(id){window.location.href = '/cancelar-agendamento/' + id}
+
+                function cancelarTodosAgendamentos(){window.location.href = '/cancelar-todos-agendamentos/'}
+
+                function telaPrincipal(){window.location.href = '/tela-principal/'}
+            </script>
+            <script>
+                function sidebarToggle() {
+                    let sidebar = $('#sb1');
+                    if (sidebar.hasClass('slide-open')) {
+                        sidebar.removeClass('slide-open')
+                        sidebar.addClass('slide-close')
+                        setTimeout(function() {
+                            sidebar.css('display', 'none')
+                        }, 570)
+                    } else {
+                        sidebar.removeClass('slide-close')
+                        sidebar.addClass('slide-open')
+                        sidebar.css('display','block')
+                    }
+                }
+                function redirectAgendamento(id) {
+                    $('html, body').animate({
+                        scrollTop: $('#' + id).offset().top
+                    }, 100)
                 }
             </script>
         {% else %}
             <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
             <script src="{% static 'js/page_principal/add_service.js' %}"></script>
             <script src="{% static 'js/page_principal/salon.js' %}"></script>
+            <script>
+                function agendamentoEspecifico(id){
+                    window.location.href = '/detalhes-agendamento-especifico/' + id
+                }
+            </script>
         {% endif %}
 {% endblock script %}

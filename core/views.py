@@ -4,7 +4,7 @@ import requests
 import tempfile
 from functools import reduce
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -148,23 +148,25 @@ def cadastrar_proprietario(request):
 def tela_principal(request):
     agendamentos_salao_id = []
     verifica_horarios_funcionamento = []
+    agendamentos_disponiveis = []
+    agendamentos_cliente = None
 
     verifica = Cliente.objects.filter(user=request.user.id).exists() # true (cliente) / false (proprietario)
 
     if verifica: # Caracteríticas do cliente
-        agendamento = Agendamento.objects.filter(cliente=Cliente.objects.get(user=request.user.id))
+        agendamentos_cliente = Agendamento.objects.filter(cliente=Cliente.objects.get(user=request.user.id))
 
         # pega os ids do salão para saber quais possuem agendamentos
-        for obj in agendamento:
+        for obj in agendamentos_cliente:
             agendamentos_salao_id.append(obj.salao.id)
         
         # verifica os horários de funcionamento, retorna os ids inválidos (fechar salão)
-        for x in Salon.objects.all():
-            for y in x.dias_funcionamento.all():
-                abertura = y.abertura
-                fechamento = y.fechamento
+        for i in Salon.objects.all():
+            for j in i.dias_funcionamento.all():
+                abertura = j.abertura
+                fechamento = j.fechamento
                 if (abertura > fechamento) or (abertura == fechamento):
-                    verifica_horarios_funcionamento.append(x.id)
+                    verifica_horarios_funcionamento.append(i.id)
                     break
             
     else: # Caracteríticas do proprietário
@@ -175,7 +177,11 @@ def tela_principal(request):
         for obj in agendamento:
             salao_id = obj.salao.id
             ocorrencias = agendamento.filter(salao_id=salao_id).count()
-            agendamentos_salao_id.append([salao_id, ocorrencias])
+            agendamentos_salao_id.append({'id':salao_id, 'ocorrencias': ocorrencias})
+            agendamentos_disponiveis.append(salao_id)
+        
+        # remove ids duplicados
+        agendamentos_salao_id = list({item['id']: item for item in agendamentos_salao_id}.values())
 
     context = {
         'verificacao': verifica,
@@ -185,6 +191,9 @@ def tela_principal(request):
         'saloes': Salon.objects.all() if verifica else Salon.objects.filter(proprietario_id=prop.id),
         'quantidade': Salon.objects.all().count() if verifica else Salon.objects.filter(proprietario_id=prop.id).count(),
         'agendamentos_salao_id': agendamentos_salao_id,
+        'quantidade_agendamentos': Agendamento.objects.all().count(),
+        'agendamentos_disponiveis': agendamentos_disponiveis if not verifica else None,
+        'agendamentos_cliente': agendamentos_cliente if verifica else None,
         'verifica_horarios': verifica_horarios_funcionamento if verifica else None
     }
 
@@ -416,12 +425,13 @@ def realizar_agendamento(request):
         return redirect('principal')
 
 @login_required(login_url='login')
-def agendamento_cliente(request,id):
+def agendamento_cliente(request, id):
     cliente = Cliente.objects.get(user_id=request.user.id)
-    
     salao = Salon.objects.get(pk=id)
-    
+    agendamentos = Agendamento.objects.filter(salao=salao)
+    horarios_ocupados = [] # [[dia_selecionado, horario_inicial, horario_final]]
     servicos = []
+
     for obj in salao.servico.all():
         servicos.append({
             'id': obj.id,
@@ -430,26 +440,112 @@ def agendamento_cliente(request,id):
             'duracao_maxima': obj.duracao_maxima_homem.strftime('%H:%M') if cliente.sexo == 'M' else obj.duracao_maxima_mulher.strftime('%H:%M')
         })
 
+    # pega os horários que já tem agendamentos
+    for agendamento in agendamentos:
+        if agendamento.cliente.sexo == 'F':
+            soma = '00:00'
+            horario_inicial = agendamento.horario_selecionado
+            for servico in agendamento.servico.all():
+                soma = somar_horarios(soma, servico.duracao_maxima_mulher.strftime('%H:%M'))
+            horarios_ocupados.append([agendamento.dia_selecionado, horario_inicial.strftime('%H:%M'), somar_horarios(horario_inicial.strftime('%H:%M'), soma)])
+        else:
+            soma = '00:00'
+            horario_inicial = agendamento.horario_selecionado
+            for servico in agendamento.servico.all():
+                soma = somar_horarios(soma, servico.duracao_maxima_homem.strftime('%H:%M'))
+            horarios_ocupados.append([agendamento.dia_selecionado, horario_inicial.strftime('%H:%M'), somar_horarios(horario_inicial.strftime('%H:%M'), soma)])
+
     context = {
         'nome': cliente.nome_completo,
         'email': request.user.email,
         'servicos': servicos,
         'dias_funcionamento': salao.dias_funcionamento.all(),
+        'horarios_ocupados': horarios_ocupados,
     }
-    
+
     return render(request,'page/agendamento_cliente.html', context)
 
 @login_required(login_url='login')
-def visualizar_agendamento_pg_cliente(request):
-    return render(request,'page/detalhes_agendamento_pg_cliente.html')
-
-@login_required(login_url='login')
 def visualizar_agendamento_pg_proprietario(request):
-    return render(request,'page/detalhes_agendamento_pg_proprietario.html') 
+    agrupamentos = []
+    novo_agrupamento = []
+
+    for obj in Agendamento.objects.all():
+        salao_id = obj.salao.id
+        encontrado = False
+
+        for grupo in agrupamentos:
+            if salao_id in grupo:
+                grupo[salao_id].append(obj)
+                encontrado = True
+                break
+
+        if not encontrado:
+            agrupamentos.append({salao_id: [obj]})
+    
+    for i in agrupamentos:
+        for j in i.values():
+            novo_agrupamento.append(j)
+
+    context = {
+        'agendamentos': novo_agrupamento,
+        'dia_atual': obter_dia_atual(),
+    }
+    
+    return render(request,'page/detalhes_agendamento_pg_proprietario.html', context) 
 
 @login_required(login_url='login')
-def visualizar_agendamento_especifico(request):
-    return render(request,'page/detalhes_agendamento_especifico.html')
+def visualizar_agendamento_especifico(request, id):
+    agendamento = Agendamento.objects.filter(salao=Salon.objects.get(pk=id))
+
+    context = {
+        'agendamento': agendamento,
+        'dia_atual': obter_dia_atual(),
+    }
+    
+    return render(request,'page/detalhes_agendamento_especifico.html', context)
+
+@login_required(login_url='login')
+def excluir_agendamento(request, id):
+    agendamento = Agendamento.objects.get(pk=id)
+    agendamento.delete()
+
+    if Agendamento.objects.all().count() == 0:
+        messages.warning(request, 'Nenhum agendamento encontrado')
+        return redirect('principal')
+
+    messages.success(request, f'Agendamento de ( {agendamento.cliente.nome_completo.upper()} ) foi excluído')
+    return redirect('detalhes-agendamento-proprietario')
+
+@login_required(login_url='login')
+def excluir_agendamento_especifico(request, id):
+    agendamento = Agendamento.objects.get(pk=id)
+    agendamento.delete()
+
+    if Agendamento.objects.all().count() == 0:
+        messages.warning(request, 'Nenhum agendamento encontrado')
+        return redirect('principal')
+
+    messages.success(request, f'Agendamento de ( {agendamento.cliente.nome_completo.upper()} ) foi excluído')
+    return redirect('detalhes-agendamento-especifico', id=agendamento.salao.id)
+
+@login_required(login_url='login')
+def cancelar_agendamento(request, id):
+    agendamento = Agendamento.objects.get(pk=id)
+    agendamento.delete()
+
+    messages.success(request, f'Agendamento do salão ( {agendamento.salao.nome_salao.upper()} ) foi cancelado')
+    return redirect('principal')
+
+@login_required(login_url='login')
+def cancelar_todos_agendamentos(request):
+    agendamentos = Agendamento.objects.filter(cliente=Cliente.objects.get(user_id=request.user.id))
+    
+    for agendamento in agendamentos:
+        agendamento.delete()
+
+    messages.success(request, 'Todos os agendamentos foram cancelados')
+    return redirect('principal')
 
 def aguardar(request):
     return render(request, 'page/detalhes_agendamento_especifico.html')
@@ -467,3 +563,25 @@ def decode_base64_image(base64_string):
     image_data = base64.b64decode(encoded_data)
     image = Image.open(BytesIO(image_data))
     return image
+
+def obter_dia_atual():
+    dias = {
+        0: 'segunda-feira',
+        1: 'terça-feira',
+        2: 'quarta-feira',
+        3: 'quinta-feira',
+        4: 'sexta-feira',
+        5: 'sabado',
+        6: 'domingo'
+    }
+
+    return dias[date.today().weekday()]
+
+def somar_horarios(horario1, horario2):
+    formato = "%H:%M"
+    tempo1 = datetime.strptime(horario1, formato).time()
+    tempo2 = datetime.strptime(horario2, formato).time()
+
+    soma = datetime.combine(datetime.min, tempo1) + timedelta(hours=tempo2.hour, minutes=tempo2.minute)
+
+    return soma.time().strftime(formato)

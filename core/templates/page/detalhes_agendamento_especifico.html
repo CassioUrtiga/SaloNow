@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block css %}
+    <link rel="stylesheet" href="{% static 'css/detalhes_agendamento.css' %}">
 {% endblock css %}
 
 {% block title %}
@@ -9,5 +10,102 @@
 {% endblock title %}
 
 {% block content %}
-    <h1>olá mundo</h1>
+    <div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+    {% for message in messages %}
+        {% if message.tags == 'success' %}
+            <div class="alert alert-success alert-dismissible fade show text-center" role="alert" style="margin-left: 4em; margin-right: 4em; margin-top: 1em;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+    {% endfor %}
+    <div class="container bootstrap snippets bootdeys">
+        <div class="row">
+            <h1 class="text-center">Salão: {{ agendamento.0.salao.nome_salao|title }}</h1>
+            {% for obj in agendamento %}
+                {% if obj.dia_selecionado|lower == dia_atual|lower %}
+                    <div class="col-md-4 col-sm-6 content-card">
+                        <div class="card-big-shadow">
+                            <div class="card card-just-text" data-background="color" data-color="blue" data-radius="none">
+                                <div class="content">
+                                    <h6 class="category">Agendamento disponível</h6>
+                                    <h4 class="title">{{ obj.cliente.nome_completo|title }}</h4>
+                                    <ul class="description">
+                                        <li>Sexo: {{ obj.cliente.sexo }}</li>
+                                        <li>Faixa etária: {{ obj.idade }}</li>
+                                        <li>Dia: {{ obj.dia_selecionado }}</li>
+                                        <li>Horário: {{ obj.horario_selecionado }}</li>
+                                        <li>Serviços: 
+                                            {% for i in obj.servico.all %}
+                                                {% if forloop.first %}( {% endif %}
+                                                {{ i.servico|title }}
+                                                {% if not forloop.last %}, {% endif %}
+                                                {% if forloop.last %}){% endif %}
+                                            {% endfor %}
+                                        </li>
+                                        <li>Pagar: R${{ obj.total_pagar }}</li>
+                                    </ul>
+                                    <div>
+                                        <button type="button" class="btn btn-success">Concluido</button>
+                                        <button type="button" class="btn btn-danger" onclick="excluirAgendamentoEspecifico({{ obj.id }})">Excluir</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            {% for obj in agendamento %}
+                {% if obj.dia_selecionado|lower != dia_atual|lower %}
+                    <div class="col-md-4 col-sm-6 content-card">
+                        <div class="card-big-shadow">
+                            <div class="card card-just-text" data-background="color" data-color="brown" data-radius="none">
+                                <div class="content">
+                                    <h6 class="category">Agendamento indisponível</h6>
+                                    <h4 class="title">{{ obj.cliente.nome_completo|title }}</h4>
+                                    <ul class="description">
+                                        <li>Sexo: {{ obj.cliente.sexo }}</li>
+                                        <li>Faixa etária: {{ obj.idade }}</li>
+                                        <li>Dia: {{ obj.dia_selecionado }}</li>
+                                        <li>Horário: {{ obj.horario_selecionado }}</li>
+                                        <li>Serviços: 
+                                            {% for i in obj.servico.all %}
+                                                {% if forloop.first %}( {% endif %}
+                                                {{ i.servico|title }}
+                                                {% if not forloop.last %}, {% endif %}
+                                                {% if forloop.last %}){% endif %}
+                                            {% endfor %}
+                                        </li>
+                                        <li>Pagar: R${{ obj.total_pagar }}</li>
+                                    </ul>
+                                    <div>
+                                        <button type="button" class="btn btn-danger" onclick="excluirAgendamentoEspecifico({{ obj.id }})">Excluir</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
 {% endblock content %}
+
+{% block script %}
+    <script>
+        // quando exluir um salão e o usuário voltar pelas setas de navegação a página é renderizada novamente
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted || window.performance && window.performance.navigation.type === 2) {
+                window.location.href = '/tela-principal/'
+            }
+        }) 
+
+        function excluirAgendamentoEspecifico(id){
+            window.location.href = '/excluir-agendamento-especifico/' + id
+        }
+    </script>
+{% endblock script %}

@@ -13,3 +13,9 @@ __pycache__
 .coverage
 
 htmlcov/*
+
+media/fotos_salao/*
+media/fotos_perfil/*
+
+!media/fotos_salao/default.jpg
+!media/fotos_perfil/default.thumbnail.png
