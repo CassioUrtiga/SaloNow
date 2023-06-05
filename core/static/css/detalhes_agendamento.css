@@ -34,10 +34,29 @@ body {
     opacity: 0.9;
 }
 
-.style-title{
-    padding-top: 5px;
-    padding-bottom: 5px;
-    text-decoration: underline;
+.title-style {
+    font-family: "Seaweed Script";
+    color: #fff;
+    text-align: center;
+    font-size: 40px;
+    position: relative;
+    margin:0;
+}
+
+.title-style span {
+    background-color: #5469d4;
+    padding: 5px 0.3em;
+    border-radius: 20px;
+}
+
+.title-style:before {
+    content:"";
+    display: block;
+    position: absolute;
+    z-index:-1;
+    top: 50%;
+    width: 100%;
+    border-bottom: 3px solid #fff;
 }
 
 .card-big-shadow {

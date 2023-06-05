@@ -25,7 +25,7 @@
     {% endfor %}
     <div class="container bootstrap snippets bootdeys">
         <div class="row">
-            <h1 class="text-center">Salão: {{ agendamento.0.salao.nome_salao|title }}</h1>
+            <p class="title-style"><span>Salão: {{ agendamento.0.salao.nome_salao|title }}</span></p>
             {% for obj in agendamento %}
                 {% if obj.dia_selecionado|lower == dia_atual|lower %}
                     <div class="col-md-4 col-sm-6 content-card">

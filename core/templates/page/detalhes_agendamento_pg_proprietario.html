@@ -26,7 +26,7 @@
     <div class="container bootstrap snippets bootdeys">
         <div class="row">
             {% for i in agendamentos %}
-                <h1 class="text-center style-title">Salão: {{ i.0.salao.nome_salao|title }}</h1>
+                <p class="title-style"><span>Salão: {{ i.0.salao.nome_salao|title }}</span></p>
                 {% for j in i %}
                     {% if j.dia_selecionado|lower == dia_atual|lower %}
                         <div class="col-md-4 col-sm-6 content-card">

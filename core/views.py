@@ -191,7 +191,7 @@ def tela_principal(request):
         'saloes': Salon.objects.all() if verifica else Salon.objects.filter(proprietario_id=prop.id),
         'quantidade': Salon.objects.all().count() if verifica else Salon.objects.filter(proprietario_id=prop.id).count(),
         'agendamentos_salao_id': agendamentos_salao_id,
-        'quantidade_agendamentos': Agendamento.objects.all().count(),
+        'quantidade_agendamentos': agendamento.count() if not verifica else None,
         'agendamentos_disponiveis': agendamentos_disponiveis if not verifica else None,
         'agendamentos_cliente': agendamentos_cliente if verifica else None,
         'verifica_horarios': verifica_horarios_funcionamento if verifica else None
@@ -470,7 +470,7 @@ def visualizar_agendamento_pg_proprietario(request):
     agrupamentos = []
     novo_agrupamento = []
 
-    for obj in Agendamento.objects.all():
+    for obj in Agendamento.objects.filter(proprietario=Proprietario.objects.get(user_id=request.user.id)):
         salao_id = obj.salao.id
         encontrado = False
 
@@ -510,7 +510,7 @@ def excluir_agendamento(request, id):
     agendamento = Agendamento.objects.get(pk=id)
     agendamento.delete()
 
-    if Agendamento.objects.all().count() == 0:
+    if Agendamento.objects.filter(proprietario=Proprietario.objects.get(user_id=request.user.id)).count() == 0:
         messages.warning(request, 'Nenhum agendamento encontrado')
         return redirect('principal')
 
@@ -522,7 +522,7 @@ def excluir_agendamento_especifico(request, id):
     agendamento = Agendamento.objects.get(pk=id)
     agendamento.delete()
 
-    if Agendamento.objects.all().count() == 0:
+    if Agendamento.objects.filter(proprietario=Proprietario.objects.get(user_id=request.user.id)).count() == 0:
         messages.warning(request, 'Nenhum agendamento encontrado')
         return redirect('principal')
 
