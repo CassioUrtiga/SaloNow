@@ -176,3 +176,7 @@ meter{
 .btn-group button:active:before {
     bottom: 0px;
 }
+
+.btn-custom {
+    width: 300px;
+}

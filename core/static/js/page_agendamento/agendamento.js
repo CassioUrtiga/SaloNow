@@ -50,6 +50,9 @@ function selecionarDia(event){
     if (soma !== '00:00'){
         let hora_abertura = event.target.getAttribute('data-hora-abertura')
         let hora_fechamento = event.target.getAttribute('data-hora-fechamento')
+        let dia = event.target.value
+        let divHorariosOcupados = document.getElementById('horarios-ocupados')
+        let inputs = divHorariosOcupados.getElementsByTagName('input')
         let faixa_horarios = []
 
         horarios_disponiveis.innerHTML = ''
@@ -57,10 +60,63 @@ function selecionarDia(event){
         if ((hora_abertura >= hora_fechamento) || (soma > hora_fechamento)){
             horarios_disponiveis.innerHTML = '<option selected>Nenhum horário disponível</option>'
         }else{
+            let comparar = []
+            let remover_horarios = []
+            let horarios_finais = []
+
+            // preenche o array com a faixa de horários já ocupados
+            for (let i=0; i<inputs.length; i++) {
+                let input = inputs[i]
+                if (input.name == dia){
+                    let partes = input.value.split('/')
+                    comparar.push([partes[0], partes[1]])
+                }
+            }
+            
+            // gera a faixa de horários
             let horario_atual = hora_abertura
             while (horario_atual < hora_fechamento){
                 faixa_horarios.push(horario_atual)
                 horario_atual = somarHorarios(horario_atual, soma) 
+            }
+
+            // verifica o limite de horários iniciais da faixa de horários ocupados
+            for (let i=0; i<faixa_horarios.length; i++){
+                for (let j=0; j<comparar.length; j++){
+                    if (faixa_horarios[i] >= comparar[j][0] && faixa_horarios[i] <= comparar[j][1]){
+                        remover_horarios.push(faixa_horarios[i])
+                    }
+                }
+            }
+            
+            // remove os horários de inicio da faixa de horários ocupados
+            for (let i=0; i<remover_horarios.length; i++){
+                let indi = faixa_horarios.indexOf(remover_horarios[i])
+                if (indi !== -1) {
+                    faixa_horarios.splice(indi, 1)
+                }
+            }
+
+            // gera a faixa de horários finais com a faixa já cortada dos horários iniciais
+            for (let i=0; i<faixa_horarios.length; i++){
+                horarios_finais.push(somarHorarios(faixa_horarios[i], soma))
+            }
+
+            // verifica os horários finais com os horários ocupados
+            remover_horarios.length = 0
+            for (let i=0; i<horarios_finais.length; i++){
+                for (let j=0; j<comparar.length; j++){
+                    if (horarios_finais[i] >= comparar[j][0] && horarios_finais[i] <= comparar[j][1]){
+                        remover_horarios.push(subtrairHorarios(horarios_finais[i], soma))
+                    }
+                }
+            }
+
+            for (let i=0; i<remover_horarios.length; i++){
+                let indi = faixa_horarios.indexOf(remover_horarios[i])
+                if (indi !== -1) {
+                    faixa_horarios.splice(indi, 1)
+                }
             }
         }
 
@@ -200,7 +256,7 @@ function enviarFormularioAgendamento(){
             form.submit()
         }
     } catch (error) {
-        mensagemTemporaria(mensagem, 'Informações inválidas')
+        mensagemTemporaria(mensagem, 'Informações inválidas/incompletas')
     }
 }
 
