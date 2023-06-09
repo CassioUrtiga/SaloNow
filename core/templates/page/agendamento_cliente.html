@@ -3,45 +3,119 @@
 
 {% block css %}
     <link rel="stylesheet" href="{% static 'css/agendamento_cliente.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.css">
 {% endblock css %}
 
 {% block title %}
-    <title>Agendamento</title>
+    <title>SaloNow-Agendamento</title>
 {% endblock title %}
 
 {% block content %}
-    <form id="msform">
-      <!-- progressbar -->
-      <ul id="progressbar">
-        <li class="active text-black">Confirmar Dados</li>
-        <li class="text-black">Agendamento</li>
-        <li class="text-black">Formas de pagamento</li>
-      </ul>
-      <!-- fieldsets -->
-      <fieldset>
-        <h2 class="fs-title">Verifique os dados</h2>
-        <h3 class="fs-subtitle">Etapa 1</h3>
-        <input type="text" name="nome" placeholder="Nome">
-        <input type="text" name="email" placeholder="Email" />
-        <input type="button" name="next" class="next action-button" value="Próximo" />
-      </fieldset>
-      <fieldset>
-        <h2 class="fs-title">Realizar Agendamento</h2>
-        <h3 class="fs-subtitle">-</h3>
-        <input type="text" name="servico" placeholder="Serviço"/>
-        <input type="button" name="previous" class="previous action-button" value="Anterior" />
-        <input type="button" name="next" class="next action-button" value="Próximo" />
-      </fieldset>
-      <fieldset>
-        <h2 class="fs-title">Realizar Pagamento</h2>
-        <h3 class="fs-subtitle">Escolha sua forma de pagamento</h3>
-        <input type="button" name="previous" class="previous action-button" value="Anterior" />
-        <a href="#" class="submit action-button" target="_top">Enviar</a>
-      </fieldset>
+    <form id="msform" method="post" action="{% url 'realizar-agendamento' %}">
+        {% csrf_token %}
+        <!-- progressbar -->
+        <ul id="progressbar">
+            <li class="active text-black">Confirmar Dados</li>
+            <li class="text-black">Agendamento</li>
+            <li class="text-black">Formas de pagamento</li>
+        </ul>
+        <!-- fieldsets -->
+        <fieldset>
+            <div>
+                <h1 style="color: #5469d4;">SaloNow</h1>
+                <h3 class="fs-subtitle">Confirme os dados</h3>
+            </div>
+            <div>
+                <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" id="idade">
+                    <option selected>Selecione a sua faixa etária</option>
+                    <option value="1">1-10 anos</option>
+                    <option value="2">11-20 anos</option>
+                    <option value="3">21-30 anos</option>
+                    <option value="4">31-40 anos</option>
+                    <option value="5">41-50 anos</option>
+                    <option value="6">51-60 anos</option>
+                    <option value="7">61-70 anos</option>
+                    <option value="8">71-80 anos</option>
+                    <option value="9">81-90 anos</option>
+                    <option value="10">91+ anos</option>
+                </select>
+            </div>
+            <div>
+                <input type="text" name="nome" placeholder="Nome" value="{{ nome }}" disabled>
+                <input type="text" name="email" placeholder="Email" value="{{ email }}" disabled>
+            </div>
+            <div class="mt-3 mb-3">
+                <a href="{% url 'principal' %}">Não é você? troque de conta</a>
+            </div>
+            <div>
+                <input type="button" name="next" class="next action-button" value="Próximo">
+            </div>
+        </fieldset>
+        <fieldset>
+            <div>
+                <h1 style="color: #5469d4;">SaloNow</h1>
+                <h3 class="fs-subtitle">Agendamento</h3>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <div class="btn-group d-block" role="group" aria-label="Basic radio toggle button group" id="dias-disponiveis">
+                    {% for obj in dias_funcionamento %}
+                        <input 
+                            data-hora-abertura="{{ obj.abertura }}" 
+                            data-hora-fechamento="{{ obj.fechamento }}" 
+                            type="radio" 
+                            class="btn-check" 
+                            name="dia" 
+                            id="{{ obj.id }}"
+                            value="{{ obj.dia_semana }}" 
+                            autocomplete="off"
+                            onchange="selecionarDia(event)"
+                        >
+                        <label class="btn btn-outline-primary" for="{{ obj.id }}">{{ obj.dia_semana }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="row d-flex justify-content-center">
+                <select id="choices-multiple-remove-button" multiple>
+                    {% for obj in servicos %}
+                        <option value="{{ obj.id }}-{{ obj.duracao_maxima }}">{{ obj.servico }} - R$ {{ obj.preco }}</option>
+                    {% endfor %}
+                </select> 
+            </div>
+            <div style="margin-top: 15px; margin-bottom: 20px;">
+                <select class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" id="horarios-disponiveis">
+                    <option selected>Escolher horário</option>
+                </select>
+            </div>
+            <div id="total">
+                <p style="font-size: 1.2em;">Total a pagar: R$0.00</p>
+            </div>
+            <div class="d-flex">
+                <input type="button" name="previous" class="previous action-button" value="Anterior" />
+                <input type="button" name="next" class="next action-button" value="Próximo" />
+            </div>
+            <div id="horarios-ocupados" style="display: none;">
+                {% for ocupado in horarios_ocupados %}
+                    <input type="hidden" name="{{ ocupado.0 }}" value="{{ ocupado.1 }}/{{ ocupado.2 }}">
+                {% endfor %}
+            </div>
+        </fieldset>
+        <fieldset>
+            <div>
+                <h1 style="color: #5469d4;">SaloNow</h1>
+                <h3 class="fs-subtitle">Escolha sua forma de pagamento</h3>
+            </div>
+            <div id="msg" class="alert alert-danger" style="display: none;"></div>
+            <div class="d-flex">
+                <input type="button" name="previous" class="previous action-button" value="Anterior" />
+                <input type="button" class="action-button" value="Realizar agendamento" onclick="enviarFormularioAgendamento()"/>
+            </div>
+        </fieldset>
     </form>
 {% endblock content %}
 
 {% block script %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
-    <script src="{% static 'js/page_agendamento/agendar_cliente.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/gh/bbbootstrap/libraries@main/choices.min.js"></script>
+    <script src="{% static 'js/page_agendamento/animation_page.js' %}"></script>
+    <script src="{% static 'js/page_agendamento/agendamento.js' %}"></script>
 {% endblock script %}
