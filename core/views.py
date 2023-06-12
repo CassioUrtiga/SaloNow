@@ -6,6 +6,7 @@ from functools import reduce
 from io import BytesIO
 from datetime import datetime, date, timedelta
 
+from django.http import HttpResponseNotFound
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -16,7 +17,7 @@ from django.core.files.base import ContentFile
 from PIL import Image
 
 from .forms import FormularioCliente, FormularioProprietario, FormularioSalao
-from .models import Cliente, Proprietario, Salon, DiasFuncionamento, Servicos, Agendamento
+from .models import Cliente, Proprietario, Salon, DiasFuncionamento, Servicos, Agendamento, CacheAgendamentos
 
 
 # Views
@@ -146,10 +147,11 @@ def cadastrar_proprietario(request):
 
 @login_required(login_url='login')
 def tela_principal(request):
+    agendamentos_cliente = None
     agendamentos_salao_id = []
     verifica_horarios_funcionamento = []
     agendamentos_disponiveis = []
-    agendamentos_cliente = None
+    cache_agendamentos = []
 
     verifica = Cliente.objects.filter(user=request.user.id).exists() # true (cliente) / false (proprietario)
 
@@ -183,6 +185,11 @@ def tela_principal(request):
         # remove ids duplicados
         agendamentos_salao_id = list({item['id']: item for item in agendamentos_salao_id}.values())
 
+        # adiciona os ids dos salões que tem agendamentos em cache
+        cache = CacheAgendamentos.objects.filter(proprietario=prop)
+        for obj in cache:
+            cache_agendamentos.append(obj.salao.id)
+
     context = {
         'verificacao': verifica,
         'cliente': Cliente.objects.get(user_id=request.user.id) if verifica else None,
@@ -194,7 +201,8 @@ def tela_principal(request):
         'quantidade_agendamentos': agendamento.count() if not verifica else None,
         'agendamentos_disponiveis': agendamentos_disponiveis if not verifica else None,
         'agendamentos_cliente': agendamentos_cliente if verifica else None,
-        'verifica_horarios': verifica_horarios_funcionamento if verifica else None
+        'verifica_horarios': verifica_horarios_funcionamento if verifica else None,
+        'cache_agendamentos': cache_agendamentos if not verifica else None,
     }
 
     return render(request, 'page/principal.html', context)
@@ -522,11 +530,11 @@ def excluir_agendamento_especifico(request, id):
     agendamento = Agendamento.objects.get(pk=id)
     agendamento.delete()
 
-    if Agendamento.objects.filter(proprietario=Proprietario.objects.get(user_id=request.user.id)).count() == 0:
-        messages.warning(request, 'Nenhum agendamento encontrado')
+    if Agendamento.objects.filter(salao=agendamento.salao.id).count() == 0:
+        messages.warning(request, f'Nenhum agendamento encontrado no salão ({agendamento.salao.nome_salao.upper()})')
         return redirect('principal')
 
-    messages.success(request, f'Agendamento de ( {agendamento.cliente.nome_completo.upper()} ) foi excluído')
+    messages.success(request, f'Agendamento de ({agendamento.cliente.nome_completo.upper()}) foi excluído')
     return redirect('detalhes-agendamento-especifico', id=agendamento.salao.id)
 
 @login_required(login_url='login')
@@ -546,6 +554,155 @@ def cancelar_todos_agendamentos(request):
 
     messages.success(request, 'Todos os agendamentos foram cancelados')
     return redirect('principal')
+
+@login_required(login_url='login')
+def concluir_agendamento(request, id):
+    agendamento = Agendamento.objects.get(pk=id)
+    
+    cache_agendamento = CacheAgendamentos(
+        proprietario = agendamento.proprietario,
+        cliente = agendamento.cliente,
+        salao = agendamento.salao,
+        idade = agendamento.idade,
+        total_pagar = agendamento.total_pagar,
+        dia_selecionado = agendamento.dia_selecionado,
+        horario_selecionado = agendamento.horario_selecionado,
+        data_concluido = date.today()
+    )
+
+    cache_agendamento.save()
+
+    for i in agendamento.servico.all():
+        cache_agendamento.servico.add(i)
+
+    agendamento.delete()
+
+    if Agendamento.objects.filter(salao=agendamento.salao.id).count() == 0:
+        messages.warning(request, f'Nenhum agendamento encontrado no salão ({agendamento.salao.nome_salao.upper()})')
+        return redirect('principal')
+
+    messages.success(request, f'Agendamento de ({agendamento.cliente.nome_completo.upper()}) concluído no salão ({agendamento.salao.nome_salao.upper()})')
+    return redirect('detalhes-agendamento-especifico', id=agendamento.salao.id)
+
+@login_required(login_url='login')
+def gerar_relatorio(request, id, index):
+    salao = Salon.objects.get(pk=id)
+    data = date.today()
+    tipo = ''
+    dados = []
+    sub_dados = []
+    servico_preferido = []
+    total_servicos = 0
+    renda = 0.0
+
+    filtro = CacheAgendamentos.objects.filter(
+        salao=salao,
+        proprietario_id=Proprietario.objects.get(user_id=request.user.id).id,
+    )
+
+    # verifica se o agendamento passou de 1 ano, para excluir
+    for obj in filtro:
+        if subtrair_datas(data, obj.data_concluido) > 365:
+            obj.delete()
+
+
+    if index == 0:
+        tipo = 'Diária'
+
+        filtro = CacheAgendamentos.objects.filter(
+            salao=salao,
+            proprietario_id=Proprietario.objects.get(user_id=request.user.id).id,
+            data_concluido=data
+        )
+    elif index == 1:
+        tipo = 'Semanal'
+        ids_filtrados = []
+
+        filtro = CacheAgendamentos.objects.filter(
+            salao=salao,
+            proprietario_id=Proprietario.objects.get(user_id=request.user.id).id,
+        )
+        
+        for obj in filtro:
+            if subtrair_datas(data, obj.data_concluido) <= 7:
+                ids_filtrados.append(obj.id)
+        
+        filtro = CacheAgendamentos.objects.filter(id__in=ids_filtrados)
+    elif index == 2:
+        tipo = 'Mensal'
+        
+        filtro = CacheAgendamentos.objects.filter(
+            salao=salao,
+            proprietario_id=Proprietario.objects.get(user_id=request.user.id).id,
+            data_concluido__month=data.month
+        )
+    elif index == 3:
+        tipo = 'Anual'
+
+        filtro = CacheAgendamentos.objects.filter(
+            salao=salao,
+            proprietario_id=Proprietario.objects.get(user_id=request.user.id).id,
+            data_concluido__year=data.year
+        )
+    else:
+        return HttpResponseNotFound("A página solicitada não foi encontrada.")
+    
+    for obj in filtro:
+        servicos = obj.servico.all()
+        dados.append([
+            obj.cliente.nome_completo,
+            obj.idade,
+            servicos.count(),
+            obj.data_concluido,
+            obj.total_pagar
+        ])
+        renda += obj.total_pagar
+        for servico in servicos:
+            total_servicos += 1
+            servico_preferido.append(servico.servico)
+    
+    if len(servico_preferido) == 0:
+        servico_preferido.append('Nenhum')
+
+    sub_dados.append([
+        filtro.count(),
+        max(set(servico_preferido),key=servico_preferido.count),
+        total_servicos,
+        renda
+    ])
+
+    context = {
+        'tipo': tipo,
+        'proprietario': salao.proprietario.nome_completo,
+        'cnpj': salao.proprietario.cnpj,
+        'nome': salao.nome_salao,
+        'cidade': salao.cidade,
+        'rua': salao.rua,
+        'bairro': salao.bairro,
+        'pais': salao.pais,
+        'numero': salao.numero,
+        'data_atual': data,
+        'hora': datetime.today().strftime('%H:%M'),
+        'dados': dados,
+        'sub_dados': sub_dados
+    }
+    
+    return render(request, 'relatorio.html', context)
+
+@login_required(login_url='login')
+def limpar_cache(request, id, index):
+    if index == 0:
+        filtro = Salon.objects.filter(proprietario_id=Proprietario.objects.get(user_id=request.user.id))
+        CacheAgendamentos.objects.filter(salao__in=filtro).delete()
+
+        messages.success(request, 'Todo o cache de agendamentos foi exluído')
+        return redirect('principal')
+    else:
+        salao = Salon.objects.get(pk=id)
+        CacheAgendamentos.objects.filter(salao=salao).delete()
+
+        messages.success(request, f'Todo o cache de agendamentos do salão ({salao.nome_salao.upper()}) foi exluído')
+        return redirect('principal')
 
 def aguardar(request):
     return render(request, 'page/detalhes_agendamento_especifico.html')
@@ -585,3 +742,7 @@ def somar_horarios(horario1, horario2):
     soma = datetime.combine(datetime.min, tempo1) + timedelta(hours=tempo2.hour, minutes=tempo2.minute)
 
     return soma.time().strftime(formato)
+
+def subtrair_datas(data1, data2):
+    valor = data1 - data2
+    return valor.days
