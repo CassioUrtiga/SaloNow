@@ -171,11 +171,13 @@
             </div>
         </div>
         <header>
-            <abbr title="Página inicial">
-                <a href="{% url 'inicio' %}">
-                    <img src="https://via.placeholder.com/100x48" alt="logo">
-                </a>
-            </abbr>
+            <div class="logo">
+                <abbr title="Página inicial">
+                    <a href="{% url 'inicio' %}">
+                        <h3>SaloNow</h3>
+                    </a>
+                </abbr>
+            </div>
             <div class="dados">
                 <img src={{ cliente.foto_perfil.thumbnail.url }} alt="">
                 <h3>{{ cliente.nome_completo|title }}</h3>
@@ -244,7 +246,7 @@
                 <h1 class="mt-5">Nenhum salão encontrado</h1>
             {% else %}
                 {% for salao in saloes %}
-                    <div class="card mb-3 w-75 div-salao" id="{{ salao.id }}" style="box-shadow: 1px 1px 15px 3px rgba(0, 0, 0, 0.371);">
+                    <div class="card mb-3 w-75 div-salao" id="{{ salao.id }}" style="box-shadow: 1px 1px 15px 3px rgba(0, 0, 0, 0.330);">
                         <div class="card-body organiza">
                             <p class="card-text">
                                 <small class="text-body-secondary">
@@ -538,12 +540,45 @@
                 </div>
             </div>
         </div>
+        <!--Modal relatórios-->
+        {% for salao in saloes %}
+            <div class="modal fade" id="viewRelatorio{{ salao.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ salao.nome_salao|title }}</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body btn-group" role="group" aria-label="Basic radio toggle button group">
+                            <input type="radio" data-index="0" class="btn-check" name="btnradio{{ salao.id }}" id="btnradio0{{ salao.id }}" autocomplete="off" checked>
+                            <label class="btn btn-outline-primary" for="btnradio0{{ salao.id }}">Diário</label>
+
+                            <input type="radio" data-index="1" class="btn-check" name="btnradio{{ salao.id }}" id="btnradio1{{ salao.id }}" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="btnradio1{{ salao.id }}">Semanal</label>
+                          
+                            <input type="radio" data-index="2" class="btn-check" name="btnradio{{ salao.id }}" id="btnradio2{{ salao.id }}" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="btnradio2{{ salao.id }}">Mensal</label>
+                          
+                            <input type="radio" data-index="3" class="btn-check" name="btnradio{{ salao.id }}" id="btnradio3{{ salao.id }}" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="btnradio3{{ salao.id }}">Anual</label>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-danger" onclick="limparCacheEspecifico({{ salao.id }})">Limpar cache</button>
+
+                            <button type="button" class="btn btn-secondary" onclick="gerarRelatorio(event, {{ salao.id }})">Gerar relatório</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
         <header>
-            <abbr title="Página inicial">
-                <a href="{% url 'inicio' %}">
-                    <img src="https://via.placeholder.com/100x48" alt="logo">
-                </a>
-            </abbr>
+            <div class="logo">
+                <abbr title="Página inicial">
+                    <a href="{% url 'inicio' %}">
+                        <h3>SaloNow</h3>
+                    </a>
+                </abbr>
+            </div>
             <h3>{{ proprietario.nome_completo|title }}</h3>
             <a href="{% url 'deslogar' %}">
                 <button type="button" class="btn btn-danger">Sair</button>
@@ -597,7 +632,15 @@
                   </h2>
                   <div id="panelsStayOpen-collapseThree" class="accordion-collapse collapse">
                     <div class="accordion-body">
-                      Lorem ipsum, dolor sit amet consectetur adipisicing elit. Qui, quasi assumenda dolore facilis sunt perferendis iste reprehenderit suscipit exercitationem soluta. Non incidunt beatae repellat fugit consectetur fugiat dolore perspiciatis ipsam!
+                        {% if cache_agendamentos|length == 0 %}
+                            <div>
+                                <button type="button" class="btn btn-warning" disabled>Cache agendamentos vazio</button>
+                            </div>
+                        {% else %}
+                            <div>
+                                <button type="button" class="btn btn-warning" onclick="limparTodoCache()">Limpar Todo cache</button>
+                            </div>
+                        {% endif %}
                     </div>
                   </div>
                 </div>
@@ -749,12 +792,21 @@
                                     </div>
                                 </button>
                                 <div>
-                                    <a href="#">
-                                        <button type="button" class="btn btn-outline-secondary">Relatório</button>
-                                    </a>
-                                    <a href="#" class="card-link">
-                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" onclick="editarSalao(event)">Editar</button>
-                                    </a>
+                                    {% if salao.id in cache_agendamentos %}
+                                        <button 
+                                            type="button" 
+                                            class="btn btn-outline-secondary" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#viewRelatorio{{ salao.id }}"
+                                        >Relatório</button>
+                                    {% endif %}
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-outline-primary card-link" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#staticBackdrop" 
+                                        onclick="editarSalao(event)"
+                                    >Editar</button>
                                     <a href="{% url 'excluir-salao' salao.id %}" class="card-link">
                                         <button type="button" class="btn btn-outline-danger">Excluir</button>
                                     </a>
@@ -772,46 +824,11 @@
         {% if verificacao %}
             <script src="{% static 'js/page_principal/filter_location.js' %}"></script>
             <script src="{% static 'js/page_principal/change_location.js' %}"></script>
-            <script>
-                function btn_sair(){window.location.href="{% url 'deslogar' %}"}
-                
-                function realizarAgendamento(id){window.location.href = '/agendamento-cliente/'+ id}
-
-                function cancelarAgendamento(id){window.location.href = '/cancelar-agendamento/' + id}
-
-                function cancelarTodosAgendamentos(){window.location.href = '/cancelar-todos-agendamentos/'}
-
-                function telaPrincipal(){window.location.href = '/tela-principal/'}
-            </script>
-            <script>
-                function sidebarToggle() {
-                    let sidebar = $('#sb1');
-                    if (sidebar.hasClass('slide-open')) {
-                        sidebar.removeClass('slide-open')
-                        sidebar.addClass('slide-close')
-                        setTimeout(function() {
-                            sidebar.css('display', 'none')
-                        }, 570)
-                    } else {
-                        sidebar.removeClass('slide-close')
-                        sidebar.addClass('slide-open')
-                        sidebar.css('display','block')
-                    }
-                }
-                function redirectAgendamento(id) {
-                    $('html, body').animate({
-                        scrollTop: $('#' + id).offset().top
-                    }, 100)
-                }
-            </script>
+            <script src="{% static 'js/page_principal/scripts_cliente.js' %}"></script>
         {% else %}
             <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
             <script src="{% static 'js/page_principal/add_service.js' %}"></script>
             <script src="{% static 'js/page_principal/salon.js' %}"></script>
-            <script>
-                function agendamentoEspecifico(id){
-                    window.location.href = '/detalhes-agendamento-especifico/' + id
-                }
-            </script>
+            <script src="{% static 'js/page_principal/scripts_proprietario.js' %}"></script>
         {% endif %}
 {% endblock script %}
