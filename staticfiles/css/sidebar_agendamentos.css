@@ -1,0 +1,115 @@
+.sidebarAgendamento{
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 380px;
+    background-color: white;
+    border-radius: 30px;
+    padding: 10px;
+    box-shadow: -2px 0px 10px rgba(0, 0, 0, 0.550);
+    z-index: 9999;
+}
+
+.sidebarAgendamento header{
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: row-reverse;
+    background-color: #09f;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    padding: 5px;
+    height: 3em;
+}
+
+.sidebarAgendamento nav{
+    overflow-y: auto;
+    height: 81%;
+}
+
+.sidebar-nav ul{
+    list-style: none;
+    padding: 5px 10px;
+}
+
+.sidebar-nav ul li{
+    display: block;
+    padding: 20px;
+    margin-bottom: 5px;
+}
+
+.sidebar-nav ul > button{
+    border-radius: 20px;
+    width: 15.5em;
+    height: auto;
+    box-shadow: inset 0px 0px 10px 6px rgba(0, 0, 0, 0.200);
+    border: 0px;
+    margin-bottom: 10px;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    width: 0.2em;
+}
+   
+.sidebar-nav::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background-color: #09f;
+}
+
+.btn-excluir{
+    position: relative;
+    left: 230px;
+    margin: 5px 0px;
+}
+
+.organiza{
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rodape{
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.center-img{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 50px;
+}
+
+.slide-open{
+    animation: abrir 0.6s normal ease-in-out;
+}
+
+.slide-close{
+    animation: fechar 0.6s normal ease-in-out;
+}
+
+@keyframes abrir {
+    from{
+        transform: translateX(100%);
+    }to{
+        transform: translateX(0);
+    }
+}
+
+@keyframes fechar {
+    from{
+        transform: translateX(0);
+    }to{
+        transform: translateX(100%);
+    }
+}

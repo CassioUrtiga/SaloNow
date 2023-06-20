@@ -1,0 +1,1 @@
+web: gunicorn salon.wsgi --log-file -
