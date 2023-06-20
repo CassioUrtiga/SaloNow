@@ -54,7 +54,8 @@ class TelaPrincipalTestCase(TestCase):
     def test_usuario_nao_autenticado(self):
         self.client.logout()
         response = self.client.post(self.url)
-        self.assertRedirects(response, '/login/')
+        expected_url = reverse('login') + '?next=' + reverse('principal')
+        self.assertRedirects(response, expected_url)
 
 class CriarSalaoTestCase(TestCase):
     
@@ -146,17 +147,19 @@ class CriarSalaoTestCase(TestCase):
         for obj in servicos:
             self.assertIn(obj.servico, form_data['servicos[]'])
     
+    
     def test_usuario_nao_autenticado(self):
         self.client.logout()
         response = self.client.post(self.url)
-        self.assertRedirects(response, '/login/')
+        expected_url = reverse('login') + '?next=' + reverse('criar-salao')
+        self.assertRedirects(response, expected_url)
+
+
 
 class ExcluirSalaoTestCase(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user = mommy.make('auth.User')
-        self.user.set_password('password123')
-        self.user.save()
+        self.user = User.objects.create_user(username='testuser', password='password123')
         self.proprietario = mommy.make(Proprietario, user=self.user)
         self.salon = mommy.make(Salon, proprietario=self.proprietario)
         self.url = reverse('excluir-salao', args=[self.salon.id])
@@ -164,7 +167,9 @@ class ExcluirSalaoTestCase(TestCase):
     def test_usuario_nao_autenticado(self):
         self.client.logout()
         response = self.client.post(self.url)
-        self.assertRedirects(response, '/login/')
+        expected_url = reverse('login')
+        expected_url += '?next=' + reverse('excluir-salao', args=[self.salon.id])
+        self.assertRedirects(response, expected_url)
 
     def test_usuario_autenticado(self):
         self.client.login(username=self.user.username, password='password123')
