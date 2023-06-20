@@ -50,7 +50,7 @@
                                         <li>Pagar: R${{ obj.total_pagar }}</li>
                                     </ul>
                                     <div>
-                                        <button type="button" class="btn btn-success">Concluido</button>
+                                        <button type="button" class="btn btn-success" onclick="concluirAgendamento({{ obj.id }})">Concluido</button>
                                         <button type="button" class="btn btn-danger" onclick="excluirAgendamentoEspecifico({{ obj.id }})">Excluir</button>
                                     </div>
                                 </div>
@@ -106,6 +106,10 @@
 
         function excluirAgendamentoEspecifico(id){
             window.location.href = '/excluir-agendamento-especifico/' + id
+        }
+
+        function concluirAgendamento(id){
+            window.location.href = '/concluir-agendamento/' + id
         }
     </script>
 {% endblock script %}

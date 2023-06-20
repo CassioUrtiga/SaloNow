@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/relatorio.css' %}">
+{% endblock css %}
+
+{% block title %}
+  <title>Relatório - {{ tipo }}</title>
+{% endblock title %}
+
+{% block content %}
+  <h1>SaloNow</h1>
+
+  <aside>
+    <address id="from">
+      {{ cidade|title }}, {{ pais|title }}
+      {{ rua|title }}
+      {{ bairro|title }}
+      {{ numero }}
+    </address>
+
+    <address id="to">
+      {{ proprietario|title }}
+      {{ cnpj }}
+    </address>
+  </aside>
+
+  <dl id="informations">
+    <dt>Salão</dt>
+    <dd>{{ nome|title }}</dd>
+    
+    <dt>Data de emissão</dt>
+    <dd>{{ data_atual }} às {{ hora }}</dd>
+  </dl>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Idade</th>
+        <th>Serviços</th>
+        <th>Concluído</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for obj in dados %}
+        <tr>
+          <td>{{ obj.0|title }}</td>
+          <td>{{ obj.1 }}</td>
+          <td>{{ obj.2 }}</td>
+          <td>{{ obj.3 }}</td>
+          <td>R$ {{ obj.4 }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table id="total">
+    <thead>
+      <tr>
+        <th>Clientes</th>
+        <th>Serviço preferido</th>
+        <th>Serviços</th>
+        <th>Renda ({{ tipo }})</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for obj in sub_dados %}
+        <tr>
+          <td>{{ obj.0 }}</td>
+          <td>{{ obj.1|title }}</td>
+          <td>{{ obj.2 }}</td>
+          <td>R$ {{ obj.3 }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock content %}

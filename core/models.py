@@ -13,7 +13,6 @@ def get_file_path_profile(instance, filename):
 def get_file_path_salon(instance, filename):
     return os.path.join("fotos_salao", f"{uuid.uuid4()}.{filename.split('.')[-1]}")
 
-
 class Cliente(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nome_completo = models.CharField(max_length=100, null=False)
@@ -30,14 +29,6 @@ class Cliente(models.Model):
     def __str__(self) -> str:
         return self.nome_completo
 
-@receiver(pre_delete, sender=Cliente)
-def cliente_delete_img(sender, instance, **kwargs):
-    if instance.foto_perfil and instance.foto_perfil.path:
-        if os.path.basename(instance.foto_perfil.path) != 'default.png':
-            if os.path.isfile(instance.foto_perfil.path):
-                os.remove(instance.foto_perfil.path)
-            instance.foto_perfil.delete_variations()
-
 class Proprietario(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nome_completo = models.CharField(max_length=100, null=False)
@@ -50,14 +41,6 @@ class Proprietario(models.Model):
 
     def __str__(self) -> str:
         return self.nome_completo
-
-@receiver(pre_delete, sender=Proprietario)
-def proprietario_delete_img(sender, instance, **kwargs):
-    if instance.foto_perfil and instance.foto_perfil.path:
-        if os.path.basename(instance.foto_perfil.path) != 'default.png':
-            if os.path.isfile(instance.foto_perfil.path):
-                os.remove(instance.foto_perfil.path)
-            instance.foto_perfil.delete_variations()
 
 class DiasFuncionamento(models.Model):
     dia_semana = models.CharField(max_length=20)
@@ -86,14 +69,6 @@ class Salon(models.Model):
     def __str__(self) -> str:
         return self.nome_salao
 
-@receiver(pre_delete, sender=Salon)
-def salon_delete_img(sender, instance, **kwargs):
-    if instance.imagem_salao and instance.imagem_salao.path:
-        if os.path.basename(instance.imagem_salao.path) != 'default.jpg':
-            if os.path.isfile(instance.imagem_salao.path):
-                os.remove(instance.imagem_salao.path)
-
-
 class Agendamento(models.Model):
     proprietario = models.ForeignKey(Proprietario, on_delete=models.CASCADE)
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
@@ -103,3 +78,37 @@ class Agendamento(models.Model):
     total_pagar = models.FloatField()
     dia_selecionado = models.CharField(max_length=30, default='')
     horario_selecionado = models.TimeField()
+
+class CacheAgendamentos(models.Model):
+    proprietario = models.ForeignKey(Proprietario, on_delete=models.CASCADE)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+    salao = models.ForeignKey(Salon, on_delete=models.CASCADE)
+    servico = models.ManyToManyField(Servicos)
+    idade = models.CharField(max_length=20, default='')
+    total_pagar = models.FloatField()
+    dia_selecionado = models.CharField(max_length=30, default='')
+    horario_selecionado = models.TimeField()
+    data_concluido = models.DateField()
+
+@receiver(pre_delete, sender=Cliente)
+def cliente_delete_img(sender, instance, **kwargs):
+    if instance.foto_perfil and instance.foto_perfil.path:
+        if os.path.basename(instance.foto_perfil.path) != 'default.png':
+            if os.path.isfile(instance.foto_perfil.path):
+                os.remove(instance.foto_perfil.path)
+            instance.foto_perfil.delete_variations()
+
+@receiver(pre_delete, sender=Proprietario)
+def proprietario_delete_img(sender, instance, **kwargs):
+    if instance.foto_perfil and instance.foto_perfil.path:
+        if os.path.basename(instance.foto_perfil.path) != 'default.png':
+            if os.path.isfile(instance.foto_perfil.path):
+                os.remove(instance.foto_perfil.path)
+            instance.foto_perfil.delete_variations()
+
+@receiver(pre_delete, sender=Salon)
+def salon_delete_img(sender, instance, **kwargs):
+    if instance.imagem_salao and instance.imagem_salao.path:
+        if os.path.basename(instance.imagem_salao.path) != 'default.jpg':
+            if os.path.isfile(instance.imagem_salao.path):
+                os.remove(instance.imagem_salao.path)

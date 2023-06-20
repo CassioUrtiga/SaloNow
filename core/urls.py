@@ -6,7 +6,8 @@ from .views import (
     login_view, logout_view, criar_salao, 
     excluirSalao, filtrar_salao, editar_salao,
     atualizar_cep_cliente, agendamento_cliente,
-    realizar_agendamento, visualizar_agendamento_pg_proprietario, visualizar_agendamento_especifico, excluir_agendamento, excluir_agendamento_especifico, cancelar_agendamento, cancelar_todos_agendamentos,
+    realizar_agendamento, visualizar_agendamento_pg_proprietario, visualizar_agendamento_especifico, excluir_agendamento, excluir_agendamento_especifico, cancelar_agendamento, cancelar_todos_agendamentos, concluir_agendamento, gerar_relatorio,
+    limpar_cache,
 )
 
 urlpatterns = [
@@ -30,4 +31,7 @@ urlpatterns = [
     path('excluir-agendamento-especifico/<int:id>/', excluir_agendamento_especifico, name='excluir-agendamento-especifico'),
     path('cancelar-agendamento/<int:id>/', cancelar_agendamento, name='cancelar-agendamento'),
     path('cancelar-todos-agendamentos/', cancelar_todos_agendamentos, name='cancelar-todos-agendamentos'),
+    path('concluir-agendamento/<int:id>/', concluir_agendamento, name='concluir-agendamento'),
+    path('relatorio/<int:id>/<int:index>/', gerar_relatorio, name='relatorio'),
+    path('limpar-cache/<int:id>/<int:index>/', limpar_cache, name='limpar-cache'),
 ]
