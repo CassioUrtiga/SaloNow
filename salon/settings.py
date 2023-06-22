@@ -3,6 +3,8 @@ from decouple import config
 import os
 import dj_database_url
 
+# Tipo de ambiente de desenvolvimento (local, production, workflow)
+development = config('DEVELOPMENT')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -63,24 +65,24 @@ WSGI_APPLICATION = 'salon.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-"""
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('NAME'),
-        'USER': config('USER'),
-        'PASSWORD': config('PASSWORD'),
-        'HOST': config('HOST'),
-        'PORT': config('PORT'),
+if development == 'local':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('NAME'),
+            'USER': config('USER'),
+            'PASSWORD': config('PASSWORD'),
+            'HOST': config('HOST'),
+            'PORT': config('PORT'),
+        }
     }
-}
-"""
 
-DATABASES = {
-    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'), conn_max_age=600),
-}
+if development == 'production':
+    DATABASES = {
+        'default': dj_database_url.parse(config('DATABASE_URL'), conn_max_age=600),
+    }
 
-if os.environ.get('GITHUB_WORKFLOW'):
+if development == 'workflow':
     DATABASES = {
         'default': {
            'ENGINE': 'django.db.backends.postgresql',
