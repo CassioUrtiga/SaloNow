@@ -14,6 +14,7 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.files.base import ContentFile
+from django.views.decorators.csrf import csrf_exempt
 from PIL import Image
 
 from .forms import FormularioCliente, FormularioProprietario, FormularioSalao
@@ -24,6 +25,7 @@ from .models import Cliente, Proprietario, Salon, DiasFuncionamento, Servicos, A
 def tela_inicial(request):
     return render(request, 'page/inicial.html')
 
+@csrf_exempt
 def login_view(request):
     if request.method == "POST":
         usuario = request.POST.get('usuario')
@@ -55,6 +57,7 @@ def logout_view(request):
     logout(request)
     return redirect('inicio')
 
+@csrf_exempt
 def cadastrar_cliente(request):
     if request.method == "POST":
         form_cliente = FormularioCliente(request.POST)
@@ -103,6 +106,7 @@ def cadastrar_cliente(request):
     else:
         return render(request, 'page_login/cadastro_cliente.html', {'form': FormularioCliente()})
 
+@csrf_exempt
 def cadastrar_proprietario(request):
     if request.method == "POST":
         form_proprietario = FormularioProprietario(request.POST)
@@ -145,6 +149,7 @@ def cadastrar_proprietario(request):
     else:
         return render(request, 'page_login/cadastro_proprietario.html', {'form': FormularioProprietario()})
 
+@csrf_exempt
 @login_required(login_url='login')
 def tela_principal(request):
     agendamentos_cliente = None
@@ -207,6 +212,7 @@ def tela_principal(request):
 
     return render(request, 'page/principal.html', context)
 
+@csrf_exempt
 @login_required(login_url='login')
 def criar_salao(request):
     form = FormularioSalao(request.POST)
@@ -270,6 +276,7 @@ def criar_salao(request):
         messages.warning(request, 'Formulário inválido')
         return redirect('principal')
 
+@csrf_exempt
 @login_required(login_url='login')
 def excluirSalao(request, id):
     salao = get_object_or_404(Salon, proprietario=Proprietario.objects.get(user_id=request.user.id), pk=id)
@@ -278,6 +285,7 @@ def excluirSalao(request, id):
 
     return redirect('principal')
 
+@csrf_exempt
 @login_required(login_url='login')
 def filtrar_salao(request):
     filtro = str(request.POST.get('filtro')).split(',')
@@ -309,6 +317,7 @@ def filtrar_salao(request):
     messages.success(request, f'Foram encontrados {context["quantidade"]} resultados para a busca')
     return render(request, 'page/principal.html', context)
 
+@csrf_exempt
 @login_required(login_url='login')
 def editar_salao(request, id):
     form = FormularioSalao(request.POST, request.FILES)
@@ -375,6 +384,7 @@ def editar_salao(request, id):
         messages.warning(request, 'Formulário inválido')
         return redirect('principal')
 
+@csrf_exempt
 @login_required(login_url='login')
 def atualizar_cep_cliente(request):
     item1 = request.POST.get('validation_message1')
@@ -401,6 +411,7 @@ def atualizar_cep_cliente(request):
 
     return redirect('principal')
 
+@csrf_exempt
 @login_required(login_url='login')
 def realizar_agendamento(request):
     try:
@@ -432,6 +443,7 @@ def realizar_agendamento(request):
         messages.error(request, 'Não foi possível efetuar o agendamento')
         return redirect('principal')
 
+@csrf_exempt
 @login_required(login_url='login')
 def agendamento_cliente(request, id):
     cliente = Cliente.objects.get(user_id=request.user.id)
