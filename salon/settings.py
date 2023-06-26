@@ -18,7 +18,11 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = ['*']
+if development == 'production':
+    ALLOWED_HOSTS = [config['WEBSITE_HOSTNAME']] 
+    CSRF_TRUSTED_ORIGINS = ['https://' + config['WEBSITE_HOSTNAME_SUB']]
+else:
+    ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
@@ -138,6 +142,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CSRF_USE_SESSIONS = config('CSRF_SECURE', default=True, cast=bool)
-CSRF_COOKIE_SECURE = config('CSRF_SECURE', default=True, cast=bool)
