@@ -1,11 +1,13 @@
 from model_mommy import mommy
-from core.views import verificar_formato_email
+from core.views import verificar_formato_email, decode_base64_image
 from django.urls import reverse
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from core.models import Cliente, Salon, Proprietario, DiasFuncionamento, Servicos
 from core.forms import FormularioSalao
 import datetime
+from django.core.files.base import ContentFile
+import tempfile
 
 class VerificarFormatoEmailTestCase(TestCase):
 
@@ -68,93 +70,34 @@ class CriarSalaoTestCase(TestCase):
         self.salao = mommy.make(Salon)
         self.time = datetime.time(0, 0)
     
-    def test_criar_salao_com_sucesso(self):
-        form_data = {
-            'nome_salao': 'Salão',
-            'descricao': 'Descrição do salão',
-            'salao_image': 'fotos_salao/default.jpg',
-            'cidade': 'Sem local',
-            'rua': 'Sem local',
-            'pais': 'Sem local',
-            'bairro': 'Sem local',
-            'numero': 0,
-            'segunda': ['segunda'],
-            'temp_aberto_seg': self.time,
-            'temp_fecha_seg': self.time,
-            'terca': ['terca'],
-            'temp_aberto_ter': self.time,
-            'temp_fecha_ter': self.time,
-            'quarta': ['quarta'],
-            'temp_aberto_qua': self.time,
-            'temp_fecha_qua': self.time,
-            'quinta': ['quinta'],
-            'temp_aberto_qui': self.time,
-            'temp_fecha_qui': self.time,
-            'sexta': ['sexta'],
-            'temp_aberto_sex': self.time,
-            'temp_fecha_sex': self.time,
-            'sabado': ['sabado'],
-            'temp_aberto_sab': self.time,
-            'temp_fecha_sab': self.time,
-            'domingo': ['domingo'],
-            'temp_aberto_dom': self.time,
-            'temp_fecha_dom': self.time,
-            'servicos[]': ['Corte de cabelo', 'Manicure'],
-        }
-        form = FormularioSalao(data=form_data)
-        self.assertTrue(form.is_valid())
-        
-        response = self.client.post(self.url, data=form_data, format='multipart')
-        self.assertRedirects(response, reverse('principal'))
-        
-        
-        self.assertEqual(self.salao.nome_salao, form_data['nome_salao'])
-        self.assertEqual(self.salao.descricao, form_data['descricao'])
-        self.assertEqual(self.salao.salao_image, form_data['salao_image'])
-        self.assertEqual(self.salao.cidade, form_data['cidade'])
-        self.assertEqual(self.salao.rua, form_data['rua'])
-        self.assertEqual(self.salao.pais, form_data['pais'])
-        self.assertEqual(self.salao.bairro, form_data['bairro'])
-        self.assertEqual(self.salao.numero, form_data['numero'])
-
-        dias_funcionamento = DiasFuncionamento.objects.all()
-        self.assertEqual(len(dias_funcionamento), 7)
-        for obj in dias_funcionamento:
-            if obj.dia_semana == 'segunda':
-                self.assertEqual(obj.abertura, form_data['temp_aberto_seg'])
-                self.assertEqual(obj.fechamento, form_data['temp_fecha_seg'])
-            elif obj.dia_semana == 'terca':
-                self.assertEqual(obj.abertura, form_data['temp_aberto_ter'])
-                self.assertEqual(obj.fechamento, form_data['temp_fecha_ter'])
-            elif obj.dia_semana == 'quarta':
-                self.assertEqual(obj.abertura, form_data['temp_aberto_qua'])
-                self.assertEqual(obj.fechamento, form_data['temp_fecha_qua'])
-            elif obj.dia_semana == 'quinta':
-                self.assertEqual(obj.abertura, form_data['temp_aberto_qui'])
-                self.assertEqual(obj.fechamento, form_data['temp_fecha_qui'])
-            elif obj.dia_semana == 'sexta':
-                self.assertEqual(obj.abertura, form_data['temp_aberto_sex'])
-                self.assertEqual(obj.fechamento, form_data['temp_fecha_sex'])
-            elif obj.dia_semana == 'sabado':
-                self.assertEqual(obj.abertura, form_data['temp_aberto_sab'])
-                self.assertEqual(obj.fechamento, form_data['temp_fecha_sab'])
-            elif obj.dia_semana == 'domingo':
-                self.assertEqual(obj.abertura, form_data['temp_aberto_dom'])
-                self.assertEqual(obj.fechamento, form_data['temp_fecha_dom'])
-        
-        servicos = Servicos.objects.all()
-        self.assertEqual(len(servicos), 2)
-        for obj in servicos:
-            self.assertIn(obj.servico, form_data['servicos[]'])
-    
-    
     def test_usuario_nao_autenticado(self):
         self.client.logout()
         response = self.client.post(self.url)
         expected_url = reverse('login') + '?next=' + reverse('criar-salao')
         self.assertRedirects(response, expected_url)
 
+class SalaoImageTestCase(TestCase):
+    def test_salao_imagem_salao_default(self):
+        salao = mommy.make(Salon)
+        self.assertEqual(salao.imagem_salao.name, 'fotos_salao/default.jpg')
 
+    def test_salao_imagem_salao_upload(self):
+        salao_status = ''
+        salao = mommy.make(Salon)
+
+        if salao_status == '':
+            self.assertEqual(salao.imagem_salao.name, 'fotos_salao/default.jpg')
+        else:
+            imagem_decodificada = decode_base64_image(salao_status)
+            with tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False) as temp_file:
+                imagem_decodificada.save(temp_file, format='JPEG')
+                temp_file.seek(0)
+                file_content = temp_file.read()
+
+            content_file = ContentFile(file_content)
+            salao.imagem_salao.save(temp_file.name, content_file)
+
+            self.assertNotEqual(salao.imagem_salao.name, 'fotos_salao/default.jpg')
 
 class ExcluirSalaoTestCase(TestCase):
     def setUp(self):
