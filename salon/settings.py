@@ -18,7 +18,11 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = ['*']
+if development == 'production':
+    ALLOWED_HOSTS = config('WEBSITE_HOSTNAME')
+    CSRF_TRUSTED_ORIGINS = config('WEBSITE_SUBNAME')
+else:
+    ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
