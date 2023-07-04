@@ -500,7 +500,7 @@ def visualizar_agendamento_pg_proprietario(request):
         'dia_atual': obter_dia_atual(),
     }
     
-    return render(request,'page/detalhes_agendamento_pg_proprietario.html', context) 
+    return render(request,'page/detalhes_agendamento_pg_proprietario.html', context)
 
 @login_required(login_url='login')
 def visualizar_agendamento_especifico(request, id):

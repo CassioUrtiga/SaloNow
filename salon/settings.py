@@ -18,11 +18,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-if development == 'production':
-    ALLOWED_HOSTS = [config['WEBSITE_HOSTNAME']] 
-    CSRF_TRUSTED_ORIGINS = ['https://' + config['WEBSITE_HOSTNAME']]
-else:
-    ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 INSTALLED_APPS = [
@@ -32,10 +28,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core'
+    'corsheaders',
+    'core',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -46,6 +44,9 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'salon.urls'
+
+if development == 'production':
+    CSRF_TRUSTED_ORIGINS = [config('ORIGIN')]
 
 TEMPLATES = [
     {
