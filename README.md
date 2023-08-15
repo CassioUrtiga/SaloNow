@@ -63,14 +63,18 @@
     O cadastro de salões no Salonow é um processo essencial que permite aos proprietários dos salões de beleza criar e gerenciar perfis detalhados de seus estabelecimentos na plataforma.
 </p>
 
-* Adição de banner/imagem
+* Adição de banner/imagem com redimensionamento
 <img src="toReadme/3.png">
+
 * Informações sobre o salão
 <img src="toReadme/4.png">
+
 * Serviços oferecidos
 <img src="toReadme/5.png">
+
 * Dias e horários de funcionamento
 <img src="toReadme/6.png">
+
 * Tela de gerenciamento de salões do proprietário
 <img src="toReadme/7.png">
 
@@ -81,7 +85,7 @@
 </p>
 <img src="toReadme/8.png">
 
-:heavy_check_mark: __Gerenciamento de agendamentos do proprietário__
+:heavy_check_mark: __Gerenciar agendamentos__
 
 <p align="justify">
     Uma tela de visualizar todos ou os específicos agendamentos de um ou mais salões. Pode marcar como concluído ou excluir o agendamento. 
